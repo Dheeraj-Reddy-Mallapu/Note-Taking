@@ -1,0 +1,35 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart' hide Text;
+
+class GuideScreen extends StatelessWidget {
+  const GuideScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    QuillController controller = QuillController.basic();
+    final decodeJson = jsonDecode(utf8.decode(base64Url.decode(
+        'W3siaW5zZXJ0IjoiRWRpdGluZyBhIG5vdGU6IiwiYXR0cmlidXRlcyI6eyJjb2xvciI6IiMwM2E5ZjQiLCJ1bmRlcmxpbmUiOnRydWV9fSx7Imluc2VydCI6IlxuQ2xpY2sgb24gdGhlIHRpdGxlIG9mIGEgbm90ZSB0byBlZGl0LyB2aWV3IGl0LiJ9LHsiaW5zZXJ0IjoiXG4iLCJhdHRyaWJ1dGVzIjp7Imxpc3QiOiJidWxsZXQifX0seyJpbnNlcnQiOiJEZWxldGluZyBhIG5vdGUgcGVybWFuZW50bHk6IiwiYXR0cmlidXRlcyI6eyJjb2xvciI6IiMwM2E5ZjQiLCJ1bmRlcmxpbmUiOnRydWV9fSx7Imluc2VydCI6IlxuRmlyc3QsIGRlbGV0ZSB0aGUgbm90ZSBieSBjbGlja2luZyBkZWxldGUgYnV0dG9uIHBsYWNlZCB0b3AtcmlnaHQgY29ybmVyIHdoaWxlIGVkaXRpbmcvIHZpZXdpbmcgdGhlIG5vdGUuIEl0IHdpbGwgbW92ZSB0aGUgbm90ZSB0byByZWN5Y2xlIGJpbi4ifSx7Imluc2VydCI6IlxuIiwiYXR0cmlidXRlcyI6eyJsaXN0IjoiYnVsbGV0In19LHsiaW5zZXJ0IjoiVGhlbiwgZGVsZXRlIHRoZSBzYW1lIGluIHJlY3ljbGUgYmluIGZvbGxvd2luZyB0aGUgc2FtZS4ifSx7Imluc2VydCI6IlxuIiwiYXR0cmlidXRlcyI6eyJsaXN0IjoiYnVsbGV0In19LHsiaW5zZXJ0IjoiVGhpcyB3aWxsIGRlbGV0ZSB0aGUgbm90ZSBwZXJtYW5lbnRseSwgZXZlbiBpbiB0aGUgZGF0YWJhc2UuIFlvdSBjYW5ub3QgZ2V0IHRoYXQgbm90ZSBiYWNrLiJ9LHsiaW5zZXJ0IjoiXG4iLCJhdHRyaWJ1dGVzIjp7Imxpc3QiOiJidWxsZXQifX0seyJpbnNlcnQiOiJEZWxldGluZyBhbGwgbm90ZXMgYW5kIHRoZSBhY2NvdW50OiIsImF0dHJpYnV0ZXMiOnsidW5kZXJsaW5lIjp0cnVlLCJjb2xvciI6IiMyOWI2ZjYifX0seyJpbnNlcnQiOiJcbllvdSBjYW4gZGVsZXRlIGFsbCB0aGUgbm90ZXMgb25lIGJ5IG9uZS4ifSx7Imluc2VydCI6IlxuIiwiYXR0cmlidXRlcyI6eyJsaXN0IjoiYnVsbGV0In19LHsiaW5zZXJ0IjoiKE9SKSJ9LHsiaW5zZXJ0IjoiXG4iLCJhdHRyaWJ1dGVzIjp7ImluZGVudCI6NX19LHsiaW5zZXJ0IjoiU2VuZGluZyBhbiBlbWFpbCB0byBkaGVlcmFqcmVkZHk5NjNAZ21haWwuY29tIHJlcXVlc3RpbmcgdGhlIGFjY291bnQgZGVsZXRpb24uIE9uY2UsIHdlIHByb2Nlc3MgdGhlIHJlcXVlc3QsIHdlIHdpbGwgc2VuZCB5b3UgYSByZXBseSBlbWFpbCByZWdhcmRpbmcgdGhlIHNhbWUuIn0seyJpbnNlcnQiOiJcbiIsImF0dHJpYnV0ZXMiOnsibGlzdCI6ImJ1bGxldCJ9fSx7Imluc2VydCI6Ik5vdGU6IFRoaXMgd2lsbCBkZWxldGUgYWxsIHRoZSBub3RlcyBwZXJtYW5lbnRseS4gQnV0LCB5b3UgY2FuIHVzZSB0aGUgYXBwIGFnYWluIHVzaW5nIHNhbWUgYWNjb3VudC4ifSx7Imluc2VydCI6IlxuIiwiYXR0cmlidXRlcyI6eyJsaXN0IjoiYnVsbGV0In19LHsiaW5zZXJ0IjoiU2F2aW5nIGEgbm90ZToiLCJhdHRyaWJ1dGVzIjp7InVuZGVybGluZSI6dHJ1ZSwiY29sb3IiOiIjMDNhOWY0In19LHsiaW5zZXJ0IjoiXG5XaGlsZSBjcmVhdGluZyBhIG5ldyBub3RlIG9yIGVkaXRpbmcgYSBub3RlLCB0aGUgdGV4dCB3aWxsIG5vdCBiZSBzYXZlZCBhdXRvbWF0aWNhbGx5LiJ9LHsiaW5zZXJ0IjoiXG4iLCJhdHRyaWJ1dGVzIjp7Imxpc3QiOiJidWxsZXQifX0seyJpbnNlcnQiOiJPbmx5LCB3aGVuIHlvdSBwcmVzcyB0aGUgc2F2ZSBidXR0b24gd2lsbCBzYXZlIHRoZSBub3RlLiJ9LHsiaW5zZXJ0IjoiXG4iLCJhdHRyaWJ1dGVzIjp7Imxpc3QiOiJidWxsZXQifX0seyJpbnNlcnQiOiJcbiJ9LHsiaW5zZXJ0IjoiUHJpdmFjeSBQb2xpY3kiLCJhdHRyaWJ1dGVzIjp7ImxpbmsiOiJodHRwczovL2dpdGh1Yi5jb20vRGhlZXJhai1SZWRkeS1NYWxsYXB1L05vdGUtVGFraW5nLS1BcHAtLWZpcmViYXNlLS9ibG9iL21hc3Rlci9wcml2YWN5LXBvbGljeS5tZCJ9fSx7Imluc2VydCI6IlxuXG5UaGFuayB5b3UgZm9yIHVzaW5nIHRoZSBhcHAuIn0seyJpbnNlcnQiOiJcbiIsImF0dHJpYnV0ZXMiOnsiaGVhZGVyIjoyfX0seyJpbnNlcnQiOiIgICJ9LHsiaW5zZXJ0IjoiRW5qb3khIiwiYXR0cmlidXRlcyI6eyJjb2xvciI6IiNmNDQzMzYifX0seyJpbnNlcnQiOiJcbiIsImF0dHJpYnV0ZXMiOnsiaGVhZGVyIjoyLCJpbmRlbnQiOjh9fV0=')));
+    controller = QuillController(
+      document: Document.fromJson(decodeJson),
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Guide to use the App'),
+      ),
+      body: QuillEditor(
+        controller: controller,
+        focusNode: FocusNode(),
+        scrollController: ScrollController(),
+        scrollable: true,
+        padding: const EdgeInsets.all(3),
+        autoFocus: false,
+        readOnly: true,
+        showCursor: false,
+        expands: true,
+      ),
+    );
+  }
+}
