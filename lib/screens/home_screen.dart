@@ -3,9 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:note_taking_firebase/screens/edit_note.dart';
-import 'package:note_taking_firebase/screens/guide_screen.dart';
-import 'package:note_taking_firebase/screens/new_note.dart';
-import 'package:note_taking_firebase/screens/recycle_bin.dart';
 import 'package:note_taking_firebase/shares_preferences.dart';
 import 'package:note_taking_firebase/widgets/my_list_tile.dart';
 import 'package:note_taking_firebase/widgets/notes_ui.dart';
@@ -132,9 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
               itemBuilder: ((context) {
                 return [
                   PopupMenuItem(
-                    child: ExpansionTile(
-                      title: const Text('Sort By'),
-                      children: [
+                    child: SubmenuButton(
+                      trailingIcon: const Icon(Icons.sort),
+                      menuChildren: [
                         ExpansionTile(
                           title: const Text('Name'),
                           children: [
@@ -200,6 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         )
                       ],
+                      child: const Text('Sort by:', style: TextStyle(fontSize: 16)),
                     ),
                   ),
                   PopupMenuItem(

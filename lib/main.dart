@@ -15,7 +15,7 @@ Future main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseAppCheck.instance.activate(
     androidProvider: AndroidProvider.playIntegrity,
-    webRecaptchaSiteKey: 'recaptcha-v3-site-key',
+    webRecaptchaSiteKey: recaptchaV3SiteKey,
   );
 
   runApp(const MyApp());
