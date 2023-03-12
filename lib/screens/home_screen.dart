@@ -97,16 +97,20 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: color.secondaryContainer,
+          shadowColor: color.secondaryContainer,
+          elevation: 3,
+          backgroundColor: color.secondaryContainer.withOpacity(0.9),
           title: TextField(
             focusNode: FocusNode(),
             controller: searchController,
             onChanged: (value) => setState(() {
               searchInput = value;
             }),
-            decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search...'),
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search),
+              hintText: 'Search...',
+            ),
           ),
-          centerTitle: true,
           actions: [
             IconButton(
               onPressed: () {
@@ -220,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [Text(viewToolTip), viewIcon],
+                      children: [Text(viewToolTip, style: const TextStyle(fontSize: 16)), viewIcon],
                     ),
                   ),
                 ];
@@ -229,6 +233,24 @@ class _HomeScreenState extends State<HomeScreen> {
               tooltip: 'Options',
             ),
           ],
+        ),
+        /*bottomNavigationBar: BottomNavigationBar(
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.notes_rounded),
+              label: 'Notes',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.image),
+              label: 'Drawings',
+            ),
+          ],
+        ),*/
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: FloatingActionButton(
+          tooltip: 'New Note',
+          onPressed: () => Navigator.pushNamed(context, 'newNote'),
+          child: const Icon(Icons.add),
         ),
         drawer: Drawer(
           child: ListView(children: [
@@ -281,12 +303,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ]),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: FloatingActionButton(
-          tooltip: 'New Note',
-          onPressed: () => Navigator.pushNamed(context, 'newNote'),
-          child: const Icon(Icons.add),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),

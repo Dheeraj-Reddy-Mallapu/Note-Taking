@@ -10,6 +10,7 @@ class NotesUI extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String title = utf8.decode(base64Url.decode(data['title']));
     final color = Theme.of(context).colorScheme;
     return SizedBox(
       height: 200,
@@ -30,7 +31,7 @@ class NotesUI extends StatelessWidget {
               color: color.primary,
             ),
             borderRadius: BorderRadius.circular(15),
-            color: color.secondaryContainer,
+            color: color.secondaryContainer.withOpacity(0.9),
           ),
           child: InkWell(
             onTap: () {
@@ -42,39 +43,41 @@ class NotesUI extends StatelessWidget {
               );
             },
             child: Column(children: [
-              Padding(
-                padding: const EdgeInsets.all(3.0),
-                child: Center(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Text(
-                      overflow: TextOverflow.ellipsis,
-                      utf8.decode(base64Url.decode(data['title'])),
-                      maxLines: 1,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: color.tertiary,
+              if (title.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(3.0),
+                  child: Center(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Text(
+                        overflow: TextOverflow.ellipsis,
+                        title,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: color.primary,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Divider(
-                height: 1,
-                color: color.primary,
-                thickness: 0.5,
-              ),
+              if (title.isNotEmpty)
+                Divider(
+                  height: 1,
+                  color: color.primary,
+                  thickness: 0.5,
+                ),
               Expanded(
                 child: quill.QuillEditor(
+                  padding: const EdgeInsets.all(2.0),
                   focusNode: FocusNode(),
                   scrollController: ScrollController(),
                   scrollable: true,
-                  padding: const EdgeInsets.all(1.0),
                   autoFocus: false,
                   expands: true,
-                  showCursor: false,
                   readOnly: true,
+                  enableInteractiveSelection: false,
                   controller: content,
                 ),
               ),
