@@ -48,35 +48,65 @@ class _EditNoteState extends State<EditNote> {
             color: color.primary,
           ),
         ),
-        centerTitle: true,
         actions: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: color.error,
-            child: IconButton(
-              iconSize: 16,
-              color: Colors.white,
-              icon: const Icon(Icons.delete_forever),
-              tooltip: 'Move to Bin',
+          ElevatedButton(
               onPressed: () {
-                String title = '';
-                if (titleController.text.isNotEmpty) {
-                  title = base64Url.encode(utf8.encode(titleController.text));
-                }
                 final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
-                FireStore().createBinNote(
-                  title: title,
-                  content: base64Url.encode(utf8.encode(jsonContent)),
-                  id: id,
-                  createdAt: widget.data['createdAt'],
-                  modifiedAt: widget.data['modifiedAt'],
-                );
-                FireStore().deleteNote(id: widget.data['id']);
-                MySnackbar().show(context, 'Moved to Recycle Bin');
+                String encodedT = base64Url.encode(utf8.encode(titleController.text));
+                String encodedC = base64Url.encode(utf8.encode(jsonContent));
+                FireStore().updateNote(id: widget.data['id'], title: encodedT, content: encodedC);
                 Navigator.pop(context);
               },
-            ),
-          ),
+              child: const Text('SAVE')),
+          PopupMenuButton(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              itemBuilder: (context) {
+                return [
+                  PopupMenuItem(
+                    child: Text(
+                      'Delete',
+                      style: TextStyle(color: color.error),
+                    ),
+                    onTap: () {
+                      String title = '';
+                      if (titleController.text.isNotEmpty) {
+                        title = base64Url.encode(utf8.encode(titleController.text));
+                      }
+                      final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
+                      FireStore().createBinNote(
+                        title: title,
+                        content: base64Url.encode(utf8.encode(jsonContent)),
+                        id: id,
+                        createdAt: widget.data['createdAt'],
+                        modifiedAt: widget.data['modifiedAt'],
+                      );
+                      FireStore().deleteNote(id: widget.data['id']).then((value) => Navigator.pop(context));
+                      MySnackbar().show(context, 'Moved to Recycle Bin');
+                      Navigator.pop(context);
+                    },
+                  ),
+                  PopupMenuItem(
+                    child: const Text('Details'),
+                    onTap: () => showBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return ListView(
+                          children: [
+                            ListTile(
+                              title: const Text("Created at:"),
+                              subtitle: Text(widget.data['createdAt']),
+                            ),
+                            ListTile(
+                              title: const Text("Last edited:"),
+                              subtitle: Text(widget.data['modifiedAt']),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ];
+              })
         ],
       ),
       body: Padding(
@@ -84,8 +114,6 @@ class _EditNoteState extends State<EditNote> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Text("(Created at: ${widget.data['createdAt']})"),
-            Text("(Modified at: ${widget.data['modifiedAt']})"),
             Row(
               children: [
                 Expanded(
@@ -112,10 +140,6 @@ class _EditNoteState extends State<EditNote> {
                 ),
               ],
             ),
-            quill.QuillToolbar.basic(
-              controller: contentController,
-              multiRowsDisplay: false,
-            ),
             Expanded(
               child: quill.QuillEditor(
                 expands: true,
@@ -128,15 +152,10 @@ class _EditNoteState extends State<EditNote> {
                 controller: contentController,
               ),
             ),
-            ElevatedButton(
-                onPressed: () {
-                  final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
-                  String encodedT = base64Url.encode(utf8.encode(titleController.text));
-                  String encodedC = base64Url.encode(utf8.encode(jsonContent));
-                  FireStore().updateNote(id: widget.data['id'], title: encodedT, content: encodedC);
-                  Navigator.pop(context);
-                },
-                child: const Text('SAVE'))
+            quill.QuillToolbar.basic(
+              controller: contentController,
+              multiRowsDisplay: false,
+            ),
           ],
         ),
       ),

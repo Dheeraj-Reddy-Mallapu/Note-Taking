@@ -130,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: favIcon,
             ),
             PopupMenuButton(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               itemBuilder: ((context) {
                 return [
                   PopupMenuItem(
