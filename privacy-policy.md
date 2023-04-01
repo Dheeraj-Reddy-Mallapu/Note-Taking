@@ -1,5 +1,6 @@
 Privacy Policy  
 ----------------
+Note Taking App is created by Dheeraj Reddy (no company involved)
 
 ### Introduction  
 Our privacy policy will help you understand what information we collect, how Note Taking App uses it, and what choices you have.
@@ -7,7 +8,7 @@ We built the Note Taking app as a free app. This SERVICE is provided at no cost 
 If you choose to use our Service, then you agree to the collection and use of information in  relation with this policy. We will not use or share your information with anyone except as described in this Privacy Policy.  
 
 ### Information Collection and Use  
-For a better experience while using our Service, we may require you to provide us with certain personally identifiable information, including but not limited to users name, email address. The information that we request will be retained by us and used as described in this privacy policy.  
+For a better experience while using our Service, we require you to provide us with certain personally identifiable information, including but not limited to users name, email address. The information that we request will be retained by us and used as described in this privacy policy.  
 The app does use third party services that may collect information used to identify you. 
 
 ### Location Information  
@@ -33,4 +34,5 @@ We may update our Privacy Policy from time to time. Thus, you are advised to rev
 ### Contact Us  
 If you have any questions or suggestions about our Privacy Policy, do not hesitate to contact us.  
 Contact Information:  
+Name: Dheeraj Reddy
 Email: dheerajreddy963gmail.com  
