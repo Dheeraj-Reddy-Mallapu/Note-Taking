@@ -50,8 +50,9 @@ class ViewNote extends StatelessWidget {
                       TextButton(onPressed: () => Navigator.pop(context), child: const Text('No')),
                       ElevatedButton(
                         onPressed: () {
-                          FireStore().deleteBinNote(id: data['id']).then((value) => Navigator.pop(context));
+                          FireStore().deleteNote(id: data['id']).then((value) => Navigator.pop(context));
                           MySnackbar().show(context, 'Deleted the note permanently!');
+                          Navigator.pop(context);
                           Navigator.pop(context);
                         },
                         child: const Text('Yes', style: TextStyle(color: Colors.deepOrange)),
@@ -94,18 +95,9 @@ class ViewNote extends StatelessWidget {
             ),
             ElevatedButton(
                 onPressed: () {
-                  final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
-                  String encodedT = base64Url.encode(utf8.encode(titleController.text));
-                  String encodedC = base64Url.encode(utf8.encode(jsonContent));
-                  FireStore().restoreNote(
-                    id: data['id'],
-                    title: encodedT,
-                    content: encodedC,
-                    createdAt: data['createdAt'],
-                    modifiedAt: data['modifiedAt'],
-                  );
-                  FireStore().deleteBinNote(id: data['id']);
+                  FireStore().restoreNote(id: data['id'], deleted: false);
                   MySnackbar().show(context, 'Restored the Note');
+                  Navigator.pop(context);
                   Navigator.pop(context);
                 },
                 child: const Text('Restore Note'))

@@ -4,12 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 final time = DateTime.now().toLocal().toString().substring(0, 19);
 final db = FirebaseFirestore.instance;
 final user = FirebaseAuth.instance.currentUser!;
+List<Map<String, dynamic>> notes = [];
 
 class FireStore {
   Future createNote({
     required String title,
     required String content,
     required String id,
+    required bool deleted,
+    //required int color,
   }) async {
     final docNote = db.collection(user.uid).doc(id);
 
@@ -17,62 +20,47 @@ class FireStore {
       'id': id,
       'title': title,
       'content': content,
+      'deleted': deleted,
       'createdAt': time,
       'modifiedAt': time,
+      'deletedAt': time,
+      //'color': color,
     };
 
     await docNote.set(json);
   }
 
   Future createBinNote({
-    required String title,
-    required String content,
     required String id,
-    required String createdAt,
-    required String modifiedAt,
-  }) async {
-    final docNote = db.collection(user.uid).doc('recycleBin').collection('notes').doc(id);
-
-    final json = {
-      'id': id,
-      'title': title,
-      'content': content,
-      'createdAt': createdAt,
-      'modifiedAt': modifiedAt,
-      'deletedAt': time,
-    };
-
-    await docNote.set(json);
-  }
-
-  Future restoreNote({
-    required String title,
-    required String content,
-    required String id,
-    required String createdAt,
-    required String modifiedAt,
+    required bool deleted,
   }) async {
     final docNote = db.collection(user.uid).doc(id);
 
     final json = {
-      'id': id,
-      'title': title,
-      'content': content,
-      'createdAt': createdAt,
-      'modifiedAt': modifiedAt,
+      'deleted': deleted,
+      'deletedAt': time,
     };
 
-    await docNote.set(json);
+    await docNote.update(json);
   }
 
-  Stream<List> readNotes({required String orderBy, required bool descending}) =>
-      db.collection(user.uid).orderBy(orderBy, descending: descending).snapshots().map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+  Future restoreNote({
+    required String id,
+    required bool deleted,
+  }) async {
+    final docNote = db.collection(user.uid).doc(id);
 
-  Stream<List> readBinNotes() => db
+    final json = {
+      'deleted': deleted,
+      'restoredAt': time,
+    };
+
+    await docNote.update(json);
+  }
+
+  Stream<List> readNotes({required String orderBy, required bool descending}) => db
       .collection(user.uid)
-      .doc('recycleBin')
-      .collection('notes')
-      .orderBy('deletedAt', descending: true)
+      .orderBy(orderBy, descending: descending)
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
 
@@ -92,12 +80,6 @@ class FireStore {
 
   Future deleteNote({required String id}) async {
     final docNote = db.collection(user.uid).doc(id);
-
-    docNote.delete();
-  }
-
-  Future deleteBinNote({required String id}) async {
-    final docNote = db.collection(user.uid).doc('recycleBin').collection('notes').doc(id);
 
     docNote.delete();
   }

@@ -17,6 +17,8 @@ class EditNote extends StatefulWidget {
 
 class _EditNoteState extends State<EditNote> {
   late String isFav;
+  late bool fav;
+  late Icon favIcon;
   String id = RandomStringGenerator(fixedLength: 15).generate();
   @override
   Widget build(BuildContext context) {
@@ -32,10 +34,20 @@ class _EditNoteState extends State<EditNote> {
     if (widget.data['isFav'] != null) {
       setState(() {
         isFav = widget.data['isFav'];
+        if (widget.data['isFav'] == 'true') {
+          fav = true;
+          favIcon = Icon(Icons.favorite);
+        }
+        if (widget.data['isFav'] == 'false') {
+          fav = false;
+          favIcon = Icon(Icons.favorite_border);
+        }
       });
     } else if (widget.data['isFav'] == null) {
       setState(() {
         isFav = 'false';
+        fav = false;
+        favIcon = Icon(Icons.favorite_border);
       });
     }
     return Scaffold(
@@ -68,21 +80,10 @@ class _EditNoteState extends State<EditNote> {
                       style: TextStyle(color: color.error),
                     ),
                     onTap: () {
-                      String title = '';
-                      if (titleController.text.isNotEmpty) {
-                        title = base64Url.encode(utf8.encode(titleController.text));
-                      }
-                      final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
-                      FireStore().createBinNote(
-                        title: title,
-                        content: base64Url.encode(utf8.encode(jsonContent)),
-                        id: id,
-                        createdAt: widget.data['createdAt'],
-                        modifiedAt: widget.data['modifiedAt'],
-                      );
-                      FireStore().deleteNote(id: widget.data['id']).then((value) => Navigator.pop(context));
+                      FireStore()
+                          .createBinNote(id: widget.data['id'], deleted: true)
+                          .whenComplete(() => Navigator.pop(context));
                       MySnackbar().show(context, 'Moved to Recycle Bin');
-                      Navigator.pop(context);
                     },
                   ),
                   PopupMenuItem(
@@ -128,15 +129,19 @@ class _EditNoteState extends State<EditNote> {
                 IconButton(
                   onPressed: () {
                     if (isFav == 'false') {
-                      isFav = 'true';
+                      setState(() {
+                        isFav = 'true';
+                      });
                       MySnackbar().show(context, 'Added to Favorites');
                     } else if (isFav == 'true') {
-                      isFav = 'false';
+                      setState(() {
+                        isFav = 'false';
+                      });
                       MySnackbar().show(context, 'Removed from Favorites');
                     }
                     db.collection(user.uid).doc(widget.data['id']).update({'isFav': isFav});
                   },
-                  icon: const Icon(Icons.favorite),
+                  icon: favIcon,
                 ),
               ],
             ),

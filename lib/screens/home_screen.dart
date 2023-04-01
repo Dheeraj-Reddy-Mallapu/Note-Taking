@@ -7,8 +7,6 @@ import 'package:note_taking_firebase/shares_preferences.dart';
 import 'package:note_taking_firebase/widgets/my_list_tile.dart';
 import 'package:note_taking_firebase/widgets/notes_ui.dart';
 import '../services/database.dart';
-import 'package:note_taking_firebase/services/google_signin.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:quick_actions/quick_actions.dart';
 
@@ -39,7 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Icon favIcon = const Icon(Icons.favorite_border);
 
   //for search
-  List<Map<String, dynamic>> customizedResults = [];
   final searchController = TextEditingController();
   String searchInput = '';
 
@@ -264,7 +261,8 @@ class _HomeScreenState extends State<HomeScreen> {
               color: color.primary,
               thickness: 0.5,
             ),
-            const MyListTile(toScreen: 'recycleBin', toScreenIcon: Icon(Icons.recycling_rounded), toScreenTitle: 'Recycle Bin'),
+            const MyListTile(
+                toScreen: 'recycleBin', toScreenIcon: Icon(Icons.recycling_rounded), toScreenTitle: 'Recycle Bin'),
             const MyListTile(toScreen: 'guide', toScreenIcon: Icon(Icons.help_outline_rounded), toScreenTitle: 'Guide'),
             ListTile(
                 leading: const Icon(Icons.info_outline_rounded),
@@ -288,21 +286,6 @@ class _HomeScreenState extends State<HomeScreen> {
               color: color.primary,
               thickness: 0.5,
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextButton.icon(
-                label: const Text('LOG OUT'),
-                style: ButtonStyle(
-                    side: MaterialStatePropertyAll(
-                  BorderSide(color: color.primary),
-                )),
-                icon: const Icon(Icons.logout_rounded),
-                onPressed: () {
-                  final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
-                  provider.googleLogout();
-                },
-              ),
-            ),
           ]),
         ),
         body: Padding(
@@ -313,18 +296,25 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (snapshot.hasError) {
                   return Text(snapshot.error.toString());
                 } else if (snapshot.hasData) {
-                  final notes = snapshot.data!;
-                  List<Map<String, dynamic>> allNotes = notes as List<Map<String, dynamic>>;
+                  final notesData = snapshot.data!;
+                  List<Map<String, dynamic>> allNotes = notesData as List<Map<String, dynamic>>;
+                  List<Map<String, dynamic>> filteredNotes = [];
                   if (searchInput.isEmpty) {
-                    customizedResults = allNotes;
+                    notes = allNotes;
+                    filteredNotes = notes.where((element) => element['deleted'] == false).toList();
                   } else {
-                    customizedResults = allNotes
-                        .where(
-                            (element) => utf8.decode(base64Url.decode(element['title'])).toString().toLowerCase().contains(searchInput.toLowerCase()))
+                    notes = allNotes
+                        .where((element) => utf8
+                            .decode(base64Url.decode(element['title']))
+                            .toString()
+                            .toLowerCase()
+                            .contains(searchInput.toLowerCase()))
                         .toList();
+                    filteredNotes = notes.where((element) => element['deleted'] == false).toList();
                   }
                   if (_fav == true) {
-                    customizedResults = allNotes.where((element) => element['isFav'] == 'true').toList();
+                    notes = allNotes.where((element) => element['isFav'] == 'true').toList();
+                    filteredNotes = notes.where((element) => element['deleted'] == false).toList();
                   }
                   if (_gridview == true) {
                     double size = MediaQuery.of(context).size.width;
@@ -346,20 +336,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       childAspectRatio = 8 / 9;
                       crossAxisCount = 7;
                     }
-                    if (customizedResults.isNotEmpty) {
+                    if (filteredNotes.isNotEmpty) {
                       return GridView.builder(
-                          itemCount: customizedResults.length,
+                          itemCount: filteredNotes.length,
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             childAspectRatio: childAspectRatio,
                             crossAxisCount: crossAxisCount,
                           ),
                           itemBuilder: (context, idx) {
-                            final data = customizedResults[idx];
+                            final data = filteredNotes[idx];
                             final decodeContent = jsonDecode(utf8.decode(base64Url.decode(data['content'])));
                             q.QuillController content = q.QuillController(
                               document: q.Document.fromJson(decodeContent),
                               selection: const TextSelection.collapsed(offset: 0),
                             );
+                            if (data['deleted'] == null) {
+                              FireStore().restoreNote(id: data['id'], deleted: false);
+                            }
                             if (searchInput.isEmpty) {
                               return NotesUI(
                                 data: data,
@@ -367,7 +360,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 openNote: EditNote(data: data, content: content),
                               );
                             }
-                            if (utf8.decode(base64Url.decode(data['title'])).toString().toLowerCase().contains(searchInput.toLowerCase())) {
+                            if (utf8
+                                .decode(base64Url.decode(data['title']))
+                                .toString()
+                                .toLowerCase()
+                                .contains(searchInput.toLowerCase())) {
                               return NotesUI(
                                 data: data,
                                 content: content,
@@ -387,16 +384,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       return const Center(child: Text('No notes found'));
                     }
                   } else {
-                    if (customizedResults.isNotEmpty) {
+                    if (filteredNotes.isNotEmpty) {
                       return ListView.builder(
-                        itemCount: customizedResults.length,
+                        itemCount: filteredNotes.length,
                         itemBuilder: (context, idx) {
-                          final data = customizedResults[idx];
+                          final data = filteredNotes[idx];
                           final decodeContent = jsonDecode(utf8.decode(base64Url.decode(data['content'])));
                           q.QuillController content = q.QuillController(
                             document: q.Document.fromJson(decodeContent),
                             selection: const TextSelection.collapsed(offset: 0),
                           );
+                          if (data['deleted'] == null) {
+                            FireStore().restoreNote(id: data['id'], deleted: false);
+                          }
                           if (searchInput.isEmpty) {
                             return NotesUI(
                               data: data,
@@ -404,7 +404,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               openNote: EditNote(data: data, content: content),
                             );
                           }
-                          if (utf8.decode(base64Url.decode(data['title'])).toString().toLowerCase().contains(searchInput.toLowerCase())) {
+                          if (utf8
+                              .decode(base64Url.decode(data['title']))
+                              .toString()
+                              .toLowerCase()
+                              .contains(searchInput.toLowerCase())) {
                             return NotesUI(
                               data: data,
                               content: content,

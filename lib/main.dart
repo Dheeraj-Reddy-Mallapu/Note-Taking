@@ -1,4 +1,5 @@
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +11,13 @@ import 'package:note_taking_firebase/services/google_signin.dart';
 import 'package:note_taking_firebase/widget_tree.dart';
 import 'package:provider/provider.dart';
 
+import 'color_schemes.g.dart';
+
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
   await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.playIntegrity,
+    androidProvider: AndroidProvider.debug,
     webRecaptchaSiteKey: recaptchaV3SiteKey,
   );
 
@@ -28,16 +31,33 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return DynamicColorBuilder(
       builder: ((ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        ColorScheme lightScheme;
+        ColorScheme darkScheme;
+
+        if (lightDynamic != null && darkDynamic != null) {
+          lightScheme = lightDynamic.harmonized();
+          lightCustomColors = lightCustomColors.harmonized(lightScheme);
+
+          darkScheme = darkDynamic.harmonized();
+          darkCustomColors = darkCustomColors.harmonized(darkScheme);
+        } else {
+          // Otherwise, use fallback schemes.
+          lightScheme = lightColorScheme;
+          darkScheme = darkColorScheme;
+        }
+
         return ChangeNotifierProvider(
           create: (context) => GoogleSignInProvider(),
           child: MaterialApp(
             theme: ThemeData(
               useMaterial3: true,
-              colorScheme: lightDynamic ?? _defaultLightColorScheme,
+              colorScheme: lightScheme,
+              extensions: [lightCustomColors],
             ),
             darkTheme: ThemeData(
               useMaterial3: true,
-              colorScheme: darkDynamic ?? _defaultDarkColorScheme,
+              colorScheme: darkScheme,
+              extensions: [darkCustomColors],
             ),
             home: const WidgetTree(),
             routes: {
@@ -51,6 +71,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-final _defaultLightColorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
-final _defaultDarkColorScheme = ColorScheme.fromSeed(seedColor: Colors.blue, brightness: Brightness.dark);

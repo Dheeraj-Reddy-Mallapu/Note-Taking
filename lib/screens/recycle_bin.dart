@@ -17,6 +17,26 @@ class _RecycleBinState extends State<RecycleBin> {
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
+    double size = MediaQuery.of(context).size.width;
+    List<Map<String, dynamic>> filteredNotes = notes.where((element) => element['deleted'] == true).toList();
+    double childAspectRatio = 3 / 5;
+    int crossAxisCount = 2;
+    if (size > 580 && size <= 720) {
+      childAspectRatio = 4 / 5;
+      crossAxisCount = 3;
+    } else if (size > 720 && size <= 880) {
+      childAspectRatio = 5 / 6;
+      crossAxisCount = 4;
+    } else if (size > 880 && size <= 1080) {
+      childAspectRatio = 6 / 7;
+      crossAxisCount = 5;
+    } else if (size > 1080 && size <= 1320) {
+      childAspectRatio = 7 / 8;
+      crossAxisCount = 6;
+    } else if (size > 1320) {
+      childAspectRatio = 8 / 9;
+      crossAxisCount = 7;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -31,60 +51,30 @@ class _RecycleBinState extends State<RecycleBin> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: StreamBuilder(
-          stream: FireStore().readBinNotes(),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Text(snapshot.error.toString());
-            } else if (snapshot.hasData) {
-              double size = MediaQuery.of(context).size.width;
-              double childAspectRatio = 3 / 5;
-              int crossAxisCount = 2;
-              if (size > 580 && size <= 720) {
-                childAspectRatio = 4 / 5;
-                crossAxisCount = 3;
-              } else if (size > 720 && size <= 880) {
-                childAspectRatio = 5 / 6;
-                crossAxisCount = 4;
-              } else if (size > 880 && size <= 1080) {
-                childAspectRatio = 6 / 7;
-                crossAxisCount = 5;
-              } else if (size > 1080 && size <= 1320) {
-                childAspectRatio = 7 / 8;
-                crossAxisCount = 6;
-              } else if (size > 1320) {
-                childAspectRatio = 8 / 9;
-                crossAxisCount = 7;
-              }
-              final notes = snapshot.data!;
-              if (notes.isNotEmpty) {
-                return GridView.builder(
-                    itemCount: notes.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      childAspectRatio: childAspectRatio,
-                      crossAxisCount: crossAxisCount,
-                    ),
-                    itemBuilder: (context, idx) {
-                      final data = notes[idx];
-                      final decodeContent = jsonDecode(utf8.decode(base64Url.decode(data['content'])));
-                      quill.QuillController content = quill.QuillController(
-                        document: quill.Document.fromJson(decodeContent),
-                        selection: const TextSelection.collapsed(offset: 0),
-                      );
-                      return NotesUI(
-                        data: data,
-                        content: content,
-                        openNote: ViewNote(data: data, content: content),
-                      );
-                    });
-              } else {
+        child: GridView.builder(
+            itemCount: filteredNotes.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              childAspectRatio: childAspectRatio,
+              crossAxisCount: crossAxisCount,
+            ),
+            itemBuilder: (context, idx) {
+              final data = filteredNotes[idx];
+              final decodeContent = jsonDecode(utf8.decode(base64Url.decode(data['content'])));
+              quill.QuillController content = quill.QuillController(
+                document: quill.Document.fromJson(decodeContent),
+                selection: const TextSelection.collapsed(offset: 0),
+              );
+              if (filteredNotes.isNotEmpty) {
+                return NotesUI(
+                  data: data,
+                  content: content,
+                  openNote: ViewNote(data: data, content: content),
+                );
+              } else if (filteredNotes.isEmpty) {
                 return const Center(child: Text('No notes found'));
               }
-            } else {
-              return const Center(child: CircularProgressIndicator());
-            }
-          },
-        ),
+              return null;
+            }),
       ),
     );
   }
