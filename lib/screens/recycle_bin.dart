@@ -64,6 +64,10 @@ class _RecycleBinState extends State<RecycleBin> {
                 document: quill.Document.fromJson(decodeContent),
                 selection: const TextSelection.collapsed(offset: 0),
               );
+              if (data['color'] == null) {
+                db.collection(user.uid).doc(data['id']).update({'color': 0});
+                return const RecycleBin();
+              }
               if (filteredNotes.isNotEmpty) {
                 return NotesUI(
                   data: data,

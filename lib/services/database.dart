@@ -12,7 +12,7 @@ class FireStore {
     required String content,
     required String id,
     required bool deleted,
-    //required int color,
+    required int color,
   }) async {
     final docNote = db.collection(user.uid).doc(id);
 
@@ -24,7 +24,7 @@ class FireStore {
       'createdAt': time,
       'modifiedAt': time,
       'deletedAt': time,
-      //'color': color,
+      'color': color,
     };
 
     await docNote.set(json);
@@ -68,12 +68,14 @@ class FireStore {
     required String title,
     required String content,
     required String id,
+    required int color,
   }) async {
     final docNote = db.collection(user.uid).doc(id);
 
     docNote.update({
       'title': title,
       'content': content,
+      'color': color,
       'modifiedAt': time,
     });
   }

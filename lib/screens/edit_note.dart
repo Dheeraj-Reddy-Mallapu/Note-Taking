@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:note_taking_firebase/services/database.dart';
 import 'package:note_taking_firebase/widgets/my_snackbar.dart';
 import 'package:random_string_generator/random_string_generator.dart';
@@ -20,6 +21,10 @@ class _EditNoteState extends State<EditNote> {
   late bool fav;
   late Icon favIcon;
   String id = RandomStringGenerator(fixedLength: 15).generate();
+
+  int colourIndex = 0;
+  late Icon selectedIcon;
+  int dummy = 0;
   @override
   Widget build(BuildContext context) {
     final titleController = TextEditingController();
@@ -30,24 +35,44 @@ class _EditNoteState extends State<EditNote> {
       document: quill.Document.fromJson(decodeJson),
       selection: const TextSelection.collapsed(offset: 0),
     );
+
     final color = Theme.of(context).colorScheme;
-    if (widget.data['isFav'] != null) {
+    final customColor = Theme.of(context).extension<CustomColors>()!;
+    List<Color> colours = [
+      color.secondaryContainer,
+      customColor.greenishblueContainer!,
+      customColor.yellowishgreenContainer!,
+      customColor.yellowishbrownContainer!,
+      customColor.pinkishredContainer!,
+    ];
+    List<Color> primaryColours = [
+      color.primary,
+      customColor.greenishblue!,
+      customColor.yellowishgreen!,
+      customColor.yellowishbrown!,
+      customColor.pinkishred!,
+    ];
+    if (dummy == 0) {
+      colourIndex = widget.data['color'];
+    }
+
+    if (widget.data['isFav'] != null && dummy == 0) {
       setState(() {
         isFav = widget.data['isFav'];
         if (widget.data['isFav'] == 'true') {
           fav = true;
-          favIcon = Icon(Icons.favorite);
+          favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
         }
         if (widget.data['isFav'] == 'false') {
           fav = false;
-          favIcon = Icon(Icons.favorite_border);
+          favIcon = const Icon(Icons.favorite_border);
         }
       });
-    } else if (widget.data['isFav'] == null) {
+    } else if (widget.data['isFav'] == null && dummy == 0) {
       setState(() {
         isFav = 'false';
         fav = false;
-        favIcon = Icon(Icons.favorite_border);
+        favIcon = const Icon(Icons.favorite_border);
       });
     }
     return Scaffold(
@@ -57,7 +82,7 @@ class _EditNoteState extends State<EditNote> {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 25,
-            color: color.primary,
+            color: primaryColours[colourIndex],
           ),
         ),
         actions: [
@@ -66,10 +91,17 @@ class _EditNoteState extends State<EditNote> {
                 final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
                 String encodedT = base64Url.encode(utf8.encode(titleController.text));
                 String encodedC = base64Url.encode(utf8.encode(jsonContent));
-                FireStore().updateNote(id: widget.data['id'], title: encodedT, content: encodedC);
-                Navigator.pop(context);
+                try {
+                  FireStore().updateNote(id: widget.data['id'], title: encodedT, content: encodedC, color: colourIndex);
+                  MySnackbar().show(context, 'Successfully SAVED ✅', color.secondaryContainer);
+                } catch (e) {
+                  MySnackbar().show(context, e.toString(), color.errorContainer);
+                }
               },
-              child: const Text('SAVE')),
+              child: Text(
+                'SAVE',
+                style: TextStyle(color: primaryColours[colourIndex]),
+              )),
           PopupMenuButton(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               itemBuilder: (context) {
@@ -80,10 +112,14 @@ class _EditNoteState extends State<EditNote> {
                       style: TextStyle(color: color.error),
                     ),
                     onTap: () {
-                      FireStore()
-                          .createBinNote(id: widget.data['id'], deleted: true)
-                          .whenComplete(() => Navigator.pop(context));
-                      MySnackbar().show(context, 'Moved to Recycle Bin');
+                      try {
+                        FireStore()
+                            .createBinNote(id: widget.data['id'], deleted: true)
+                            .whenComplete(() => Navigator.pop(context));
+                        MySnackbar().show(context, 'Moved to Recycle Bin ✅', color.secondaryContainer);
+                      } catch (e) {
+                        MySnackbar().show(context, e.toString(), color.errorContainer);
+                      }
                     },
                   ),
                   PopupMenuItem(
@@ -115,6 +151,47 @@ class _EditNoteState extends State<EditNote> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
+            Expanded(
+              flex: 2,
+              child: Row(
+                children: [
+                  const Text('Colour:   '),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: colours.length,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) {
+                        if (colourIndex == index) {
+                          selectedIcon = const Icon(Icons.done);
+                        } else {
+                          selectedIcon = Icon(Icons.adjust, color: colours[index]);
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: InkWell(
+                            child: Container(
+                              height: 35,
+                              width: 35,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: colours[index],
+                              ),
+                              child: selectedIcon,
+                            ),
+                            onTap: () {
+                              setState(() {
+                                colourIndex = index;
+                                dummy++;
+                              });
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Row(
               children: [
                 Expanded(
@@ -131,13 +208,17 @@ class _EditNoteState extends State<EditNote> {
                     if (isFav == 'false') {
                       setState(() {
                         isFav = 'true';
+                        favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
+                        dummy++;
                       });
-                      MySnackbar().show(context, 'Added to Favorites');
+                      MySnackbar().show(context, 'Added to Favorites ✅', color.secondaryContainer);
                     } else if (isFav == 'true') {
                       setState(() {
                         isFav = 'false';
+                        favIcon = const Icon(Icons.favorite_border);
+                        dummy++;
                       });
-                      MySnackbar().show(context, 'Removed from Favorites');
+                      MySnackbar().show(context, 'Removed from Favorites ❌', color.secondaryContainer);
                     }
                     db.collection(user.uid).doc(widget.data['id']).update({'isFav': isFav});
                   },
@@ -146,6 +227,7 @@ class _EditNoteState extends State<EditNote> {
               ],
             ),
             Expanded(
+              flex: 18,
               child: quill.QuillEditor(
                 expands: true,
                 padding: const EdgeInsets.all(2),

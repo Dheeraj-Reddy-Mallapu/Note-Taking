@@ -20,6 +20,7 @@ class ViewNote extends StatelessWidget {
       document: quill.Document.fromJson(decodeJson),
       selection: const TextSelection.collapsed(offset: 0),
     );
+
     final color = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
@@ -51,7 +52,7 @@ class ViewNote extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {
                           FireStore().deleteNote(id: data['id']).then((value) => Navigator.pop(context));
-                          MySnackbar().show(context, 'Deleted the note permanently!');
+                          MySnackbar().show(context, 'Deleted the note permanently!', color.secondaryContainer);
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
@@ -96,7 +97,7 @@ class ViewNote extends StatelessWidget {
             ElevatedButton(
                 onPressed: () {
                   FireStore().restoreNote(id: data['id'], deleted: false);
-                  MySnackbar().show(context, 'Restored the Note');
+                  MySnackbar().show(context, 'Restored the Note', color.secondaryContainer);
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },

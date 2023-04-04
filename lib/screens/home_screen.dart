@@ -59,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
+
     if (_gridview == true) {
       setState(() {
         viewIcon = const Icon(Icons.list_rounded);
@@ -95,8 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         appBar: AppBar(
           shadowColor: color.secondaryContainer,
-          elevation: 3,
-          backgroundColor: color.secondaryContainer.withOpacity(0.9),
+          elevation: 5,
           title: TextField(
             focusNode: FocusNode(),
             controller: searchController,
@@ -350,8 +350,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               document: q.Document.fromJson(decodeContent),
                               selection: const TextSelection.collapsed(offset: 0),
                             );
-                            if (data['deleted'] == null) {
-                              FireStore().restoreNote(id: data['id'], deleted: false);
+                            if (data['color'] == null) {
+                              db.collection(user.uid).doc(data['id']).update({'color': 0});
+                              return const HomeScreen();
                             }
                             if (searchInput.isEmpty) {
                               return NotesUI(
@@ -394,8 +395,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             document: q.Document.fromJson(decodeContent),
                             selection: const TextSelection.collapsed(offset: 0),
                           );
-                          if (data['deleted'] == null) {
-                            FireStore().restoreNote(id: data['id'], deleted: false);
+                          if (data['color'] == null) {
+                            db.collection(user.uid).doc(data['id']).update({'color': 0});
+                            return const HomeScreen();
                           }
                           if (searchInput.isEmpty) {
                             return NotesUI(

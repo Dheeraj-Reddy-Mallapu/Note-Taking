@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:note_taking_firebase/custom_color.g.dart';
 
 class NotesUI extends StatelessWidget {
   const NotesUI({super.key, required this.data, required this.content, required this.openNote});
@@ -11,7 +12,25 @@ class NotesUI extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String title = utf8.decode(base64Url.decode(data['title']));
+
     final color = Theme.of(context).colorScheme;
+    final customColor = Theme.of(context).extension<CustomColors>()!;
+    List<Color> colours = [
+      color.secondaryContainer,
+      customColor.greenishblueContainer!,
+      customColor.yellowishgreenContainer!,
+      customColor.yellowishbrownContainer!,
+      customColor.pinkishredContainer!,
+    ];
+    List<Color> primaryColours = [
+      color.primary,
+      customColor.greenishblue!,
+      customColor.yellowishgreen!,
+      customColor.yellowishbrown!,
+      customColor.pinkishred!,
+    ];
+    int colourIndex = data['color'];
+
     return SizedBox(
       height: 200,
       child: Padding(
@@ -22,16 +41,16 @@ class NotesUI extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 blurRadius: 3,
-                color: color.primary,
+                color: primaryColours[colourIndex],
                 offset: const Offset(0, 2),
               )
             ],
             border: Border.all(
               width: 0.5,
-              color: color.primary,
+              color: primaryColours[colourIndex],
             ),
             borderRadius: BorderRadius.circular(15),
-            color: color.secondaryContainer.withOpacity(0.9),
+            color: colours[colourIndex].withOpacity(0.9),
           ),
           child: InkWell(
             onTap: () {
@@ -56,7 +75,7 @@ class NotesUI extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color: color.primary,
+                          color: primaryColours[colourIndex],
                         ),
                       ),
                     ),
@@ -65,7 +84,7 @@ class NotesUI extends StatelessWidget {
               if (title.isNotEmpty)
                 Divider(
                   height: 1,
-                  color: color.primary,
+                  color: primaryColours[colourIndex],
                   thickness: 0.5,
                 ),
               Expanded(
