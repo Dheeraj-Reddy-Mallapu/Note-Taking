@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:note_taking_firebase/screens/edit_note.dart';
 import 'package:note_taking_firebase/shares_preferences.dart';
+import 'package:note_taking_firebase/widgets/my_gridview.dart';
 import 'package:note_taking_firebase/widgets/my_list_tile.dart';
-import 'package:note_taking_firebase/widgets/notes_ui.dart';
+import 'package:note_taking_firebase/widgets/my_listview.dart';
 import '../services/database.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:quick_actions/quick_actions.dart';
@@ -84,7 +84,10 @@ class _HomeScreenState extends State<HomeScreen> {
     getFav().then((value) => _fav);
     if (_fav == true) {
       setState(() {
-        favIcon = const Icon(Icons.favorite);
+        favIcon = const Icon(
+          Icons.favorite,
+          color: Colors.redAccent,
+        );
       });
     } else {
       favIcon = const Icon(Icons.favorite_border);
@@ -95,6 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
+          backgroundColor: color.secondaryContainer,
           shadowColor: color.secondaryContainer,
           elevation: 5,
           title: TextField(
@@ -262,8 +266,15 @@ class _HomeScreenState extends State<HomeScreen> {
               thickness: 0.5,
             ),
             const MyListTile(
-                toScreen: 'recycleBin', toScreenIcon: Icon(Icons.recycling_rounded), toScreenTitle: 'Recycle Bin'),
-            const MyListTile(toScreen: 'guide', toScreenIcon: Icon(Icons.help_outline_rounded), toScreenTitle: 'Guide'),
+              toScreen: 'recycleBin',
+              toScreenIcon: Icon(Icons.recycling_rounded),
+              toScreenTitle: 'Recycle Bin',
+            ),
+            const MyListTile(
+              toScreen: 'guide',
+              toScreenIcon: Icon(Icons.help_outline_rounded),
+              toScreenTitle: 'Guide',
+            ),
             ListTile(
                 leading: const Icon(Icons.info_outline_rounded),
                 title: const Text('About'),
@@ -289,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ]),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(6.0),
           child: StreamBuilder<List>(
               stream: FireStore().readNotes(orderBy: _orderBy, descending: _descending),
               builder: (context, snapshot) {
@@ -317,116 +328,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     filteredNotes = notes.where((element) => element['deleted'] == false).toList();
                   }
                   if (_gridview == true) {
-                    double size = MediaQuery.of(context).size.width;
-                    double childAspectRatio = 3 / 5;
-                    int crossAxisCount = 2;
-                    if (size > 580 && size <= 720) {
-                      childAspectRatio = 4 / 5;
-                      crossAxisCount = 3;
-                    } else if (size > 720 && size <= 880) {
-                      childAspectRatio = 5 / 6;
-                      crossAxisCount = 4;
-                    } else if (size > 880 && size <= 1080) {
-                      childAspectRatio = 6 / 7;
-                      crossAxisCount = 5;
-                    } else if (size > 1080 && size <= 1320) {
-                      childAspectRatio = 7 / 8;
-                      crossAxisCount = 6;
-                    } else if (size > 1320) {
-                      childAspectRatio = 8 / 9;
-                      crossAxisCount = 7;
-                    }
                     if (filteredNotes.isNotEmpty) {
-                      return GridView.builder(
-                          itemCount: filteredNotes.length,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            childAspectRatio: childAspectRatio,
-                            crossAxisCount: crossAxisCount,
-                          ),
-                          itemBuilder: (context, idx) {
-                            final data = filteredNotes[idx];
-                            final decodeContent = jsonDecode(utf8.decode(base64Url.decode(data['content'])));
-                            q.QuillController content = q.QuillController(
-                              document: q.Document.fromJson(decodeContent),
-                              selection: const TextSelection.collapsed(offset: 0),
-                            );
-                            if (data['color'] == null) {
-                              db.collection(user.uid).doc(data['id']).update({'color': 0});
-                              return const HomeScreen();
-                            }
-                            if (searchInput.isEmpty) {
-                              return NotesUI(
-                                data: data,
-                                content: content,
-                                openNote: EditNote(data: data, content: content),
-                              );
-                            }
-                            if (utf8
-                                .decode(base64Url.decode(data['title']))
-                                .toString()
-                                .toLowerCase()
-                                .contains(searchInput.toLowerCase())) {
-                              return NotesUI(
-                                data: data,
-                                content: content,
-                                openNote: EditNote(data: data, content: content),
-                              );
-                            }
-                            if (_fav == true) {
-                              return NotesUI(
-                                data: data,
-                                content: content,
-                                openNote: EditNote(data: data, content: content),
-                              );
-                            }
-                            return null;
-                          });
+                      return MyGridView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
                     } else {
                       return const Center(child: Text('No notes found'));
                     }
                   } else {
                     if (filteredNotes.isNotEmpty) {
-                      return ListView.builder(
-                        itemCount: filteredNotes.length,
-                        itemBuilder: (context, idx) {
-                          final data = filteredNotes[idx];
-                          final decodeContent = jsonDecode(utf8.decode(base64Url.decode(data['content'])));
-                          q.QuillController content = q.QuillController(
-                            document: q.Document.fromJson(decodeContent),
-                            selection: const TextSelection.collapsed(offset: 0),
-                          );
-                          if (data['color'] == null) {
-                            db.collection(user.uid).doc(data['id']).update({'color': 0});
-                            return const HomeScreen();
-                          }
-                          if (searchInput.isEmpty) {
-                            return NotesUI(
-                              data: data,
-                              content: content,
-                              openNote: EditNote(data: data, content: content),
-                            );
-                          }
-                          if (utf8
-                              .decode(base64Url.decode(data['title']))
-                              .toString()
-                              .toLowerCase()
-                              .contains(searchInput.toLowerCase())) {
-                            return NotesUI(
-                              data: data,
-                              content: content,
-                              openNote: EditNote(data: data, content: content),
-                            );
-                          }
-                          if (_fav == true) {
-                            return NotesUI(
-                              data: data,
-                              content: content,
-                              openNote: EditNote(data: data, content: content),
-                            );
-                          }
-                          return null;
-                        },
-                      );
+                      return MyListView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
                     } else {
                       return const Center(child: Text('No notes found'));
                     }

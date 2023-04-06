@@ -29,6 +29,8 @@ class _NewNoteState extends State<NewNote> {
       customColor.yellowishgreenContainer!,
       customColor.yellowishbrownContainer!,
       customColor.pinkishredContainer!,
+      customColor.blueContainer!,
+      customColor.purpleContainer!,
     ];
     List<Color> primaryColours = [
       color.primary,
@@ -36,9 +38,12 @@ class _NewNoteState extends State<NewNote> {
       customColor.yellowishgreen!,
       customColor.yellowishbrown!,
       customColor.pinkishred!,
+      customColor.blue!,
+      customColor.purple!,
     ];
 
     return Scaffold(
+      backgroundColor: colours[colourIndex],
       appBar: AppBar(
         title: Text('New Note',
             style: TextStyle(
@@ -58,7 +63,7 @@ class _NewNoteState extends State<NewNote> {
                 try {
                   FireStore()
                       .createNote(id: id, title: encodedT, content: encodedC, deleted: false, color: colourIndex);
-                  MySnackbar().show(context, 'Successfully SAVED ✅', color.secondaryContainer);
+                  MySnackbar().show(context, 'Successfully SAVED ✅', colours[colourIndex]);
                 } catch (e) {
                   MySnackbar().show(context, e.toString(), color.errorContainer);
                 }
@@ -71,8 +76,8 @@ class _NewNoteState extends State<NewNote> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 2,
+            SizedBox(
+              height: 40,
               child: Row(
                 children: [
                   const Text('Colour:   '),
@@ -124,7 +129,6 @@ class _NewNoteState extends State<NewNote> {
                   )),
             ),
             Expanded(
-              flex: 18,
               child: quill.QuillEditor.basic(
                 readOnly: false,
                 controller: contentController,

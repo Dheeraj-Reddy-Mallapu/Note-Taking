@@ -44,6 +44,8 @@ class _EditNoteState extends State<EditNote> {
       customColor.yellowishgreenContainer!,
       customColor.yellowishbrownContainer!,
       customColor.pinkishredContainer!,
+      customColor.blueContainer!,
+      customColor.purpleContainer!,
     ];
     List<Color> primaryColours = [
       color.primary,
@@ -51,6 +53,8 @@ class _EditNoteState extends State<EditNote> {
       customColor.yellowishgreen!,
       customColor.yellowishbrown!,
       customColor.pinkishred!,
+      customColor.blue!,
+      customColor.purple!,
     ];
     if (dummy == 0) {
       colourIndex = widget.data['color'];
@@ -77,6 +81,7 @@ class _EditNoteState extends State<EditNote> {
     }
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: colours[colourIndex],
         title: Text(
           'Edit Note',
           style: TextStyle(
@@ -93,7 +98,7 @@ class _EditNoteState extends State<EditNote> {
                 String encodedC = base64Url.encode(utf8.encode(jsonContent));
                 try {
                   FireStore().updateNote(id: widget.data['id'], title: encodedT, content: encodedC, color: colourIndex);
-                  MySnackbar().show(context, 'Successfully SAVED ✅', color.secondaryContainer);
+                  MySnackbar().show(context, 'Successfully SAVED ✅', colours[colourIndex]);
                 } catch (e) {
                   MySnackbar().show(context, e.toString(), color.errorContainer);
                 }
@@ -116,7 +121,7 @@ class _EditNoteState extends State<EditNote> {
                         FireStore()
                             .createBinNote(id: widget.data['id'], deleted: true)
                             .whenComplete(() => Navigator.pop(context));
-                        MySnackbar().show(context, 'Moved to Recycle Bin ✅', color.secondaryContainer);
+                        MySnackbar().show(context, 'Moved to Recycle Bin ✅', colours[colourIndex]);
                       } catch (e) {
                         MySnackbar().show(context, e.toString(), color.errorContainer);
                       }
@@ -151,8 +156,8 @@ class _EditNoteState extends State<EditNote> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Expanded(
-              flex: 2,
+            SizedBox(
+              height: 40,
               child: Row(
                 children: [
                   const Text('Colour:   '),
@@ -211,7 +216,7 @@ class _EditNoteState extends State<EditNote> {
                         favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
                         dummy++;
                       });
-                      MySnackbar().show(context, 'Added to Favorites ✅', color.secondaryContainer);
+                      MySnackbar().show(context, 'Added to Favorites ✅', colours[colourIndex]);
                     } else if (isFav == 'true') {
                       setState(() {
                         isFav = 'false';
@@ -227,7 +232,6 @@ class _EditNoteState extends State<EditNote> {
               ],
             ),
             Expanded(
-              flex: 18,
               child: quill.QuillEditor(
                 expands: true,
                 padding: const EdgeInsets.all(2),

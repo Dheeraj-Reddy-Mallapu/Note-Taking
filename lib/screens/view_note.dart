@@ -79,6 +79,8 @@ class ViewNote extends StatelessWidget {
               maxLines: 2,
               readOnly: true,
               controller: titleController,
+              textCapitalization: TextCapitalization.sentences,
+              keyboardType: TextInputType.text,
               decoration: const InputDecoration(hintText: 'Title'),
             ),
             Expanded(

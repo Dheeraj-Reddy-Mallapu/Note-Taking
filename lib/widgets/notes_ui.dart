@@ -4,10 +4,17 @@ import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:note_taking_firebase/custom_color.g.dart';
 
 class NotesUI extends StatelessWidget {
-  const NotesUI({super.key, required this.data, required this.content, required this.openNote});
+  const NotesUI({
+    super.key,
+    required this.data,
+    required this.content,
+    required this.openNote,
+    required this.index,
+  });
   final Map<String, dynamic> data;
   final quill.QuillController content;
   final Widget openNote;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +28,8 @@ class NotesUI extends StatelessWidget {
       customColor.yellowishgreenContainer!,
       customColor.yellowishbrownContainer!,
       customColor.pinkishredContainer!,
+      customColor.blueContainer!,
+      customColor.purpleContainer!,
     ];
     List<Color> primaryColours = [
       color.primary,
@@ -28,13 +37,15 @@ class NotesUI extends StatelessWidget {
       customColor.yellowishgreen!,
       customColor.yellowishbrown!,
       customColor.pinkishred!,
+      customColor.blue!,
+      customColor.purple!,
     ];
     int colourIndex = data['color'];
 
     return SizedBox(
       height: 200,
       child: Padding(
-        padding: const EdgeInsets.all(5.0),
+        padding: const EdgeInsets.all(6.0),
         child: Container(
           alignment: Alignment.topLeft,
           decoration: BoxDecoration(
