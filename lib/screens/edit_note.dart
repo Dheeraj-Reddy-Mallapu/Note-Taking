@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:note_taking_firebase/services/database.dart';
 import 'package:note_taking_firebase/widgets/my_snackbar.dart';
@@ -10,7 +10,7 @@ import 'package:random_string_generator/random_string_generator.dart';
 class EditNote extends StatefulWidget {
   const EditNote({super.key, required this.data, required this.content});
   final Map<String, dynamic> data;
-  final quill.QuillController content;
+  final q.QuillController content;
 
   @override
   State<EditNote> createState() => _EditNoteState();
@@ -28,11 +28,11 @@ class _EditNoteState extends State<EditNote> {
   @override
   Widget build(BuildContext context) {
     final titleController = TextEditingController();
-    quill.QuillController contentController = quill.QuillController.basic();
+    q.QuillController contentController = q.QuillController.basic();
     titleController.text = utf8.decode(base64Url.decode(widget.data['title']));
     final decodeJson = jsonDecode(utf8.decode(base64Url.decode(widget.data['content'])));
-    contentController = quill.QuillController(
-      document: quill.Document.fromJson(decodeJson),
+    contentController = q.QuillController(
+      document: q.Document.fromJson(decodeJson),
       selection: const TextSelection.collapsed(offset: 0),
     );
 
@@ -232,7 +232,7 @@ class _EditNoteState extends State<EditNote> {
               ],
             ),
             Expanded(
-              child: quill.QuillEditor(
+              child: q.QuillEditor(
                 expands: true,
                 padding: const EdgeInsets.all(2),
                 focusNode: FocusNode(),
@@ -240,10 +240,11 @@ class _EditNoteState extends State<EditNote> {
                 scrollable: true,
                 autoFocus: false,
                 readOnly: false,
+                paintCursorAboveText: true,
                 controller: contentController,
               ),
             ),
-            quill.QuillToolbar.basic(
+            q.QuillToolbar.basic(
               controller: contentController,
               multiRowsDisplay: false,
             ),

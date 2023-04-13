@@ -19,6 +19,8 @@ class _NewNoteState extends State<NewNote> {
   int colourIndex = 0;
   late Icon selectedIcon;
   quill.QuillController contentController = quill.QuillController.basic();
+
+  var id = RandomStringGenerator(fixedLength: 15).generate();
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
@@ -43,8 +45,8 @@ class _NewNoteState extends State<NewNote> {
     ];
 
     return Scaffold(
-      backgroundColor: colours[colourIndex],
       appBar: AppBar(
+        backgroundColor: colours[colourIndex],
         title: Text('New Note',
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -59,7 +61,7 @@ class _NewNoteState extends State<NewNote> {
                 final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
                 String encodedT = base64Url.encode(utf8.encode(titleController.text));
                 String encodedC = base64Url.encode(utf8.encode(jsonContent));
-                var id = RandomStringGenerator(fixedLength: 15).generate();
+
                 try {
                   FireStore()
                       .createNote(id: id, title: encodedT, content: encodedC, deleted: false, color: colourIndex);

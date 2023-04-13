@@ -114,7 +114,7 @@ class MyGridView extends StatelessWidget {
               ),
             );
           }
-          return const Center(child: Text('No notes found'));
+          return const Center(child: Text('Something went wrong'));
         }),
       ),
     );

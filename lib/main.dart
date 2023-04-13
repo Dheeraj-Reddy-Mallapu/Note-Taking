@@ -1,4 +1,5 @@
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -15,6 +16,8 @@ import 'color_schemes.g.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
   await FirebaseAppCheck.instance.activate(
     androidProvider: AndroidProvider.playIntegrity,
@@ -65,6 +68,7 @@ class MyApp extends StatelessWidget {
               'recycleBin': (context) => const RecycleBin(),
               'newNote': (context) => const NewNote(),
             },
+            debugShowCheckedModeBanner: false,
           ),
         );
       }),

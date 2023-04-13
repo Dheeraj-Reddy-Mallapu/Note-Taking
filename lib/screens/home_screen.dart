@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:note_taking_firebase/screens/new_note.dart';
 import 'package:note_taking_firebase/shares_preferences.dart';
 import 'package:note_taking_firebase/widgets/my_gridview.dart';
 import 'package:note_taking_firebase/widgets/my_list_tile.dart';
@@ -9,6 +12,7 @@ import 'package:note_taking_firebase/widgets/my_listview.dart';
 import '../services/database.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:quick_actions/quick_actions.dart';
+import 'package:animations/animations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,6 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final searchController = TextEditingController();
   String searchInput = '';
 
+  BannerAd? banner;
+
   //**for quick actions
   final quickActions = const QuickActions();
   @override
@@ -53,12 +59,27 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.pushNamed(context, 'newNote');
       }
     });
+
+    //for Ads
+    BannerAd(
+      size: AdSize.banner,
+      adUnitId: 'ca-app-pub-5541125993552460/7474212401',
+      listener: BannerAdListener(
+        onAdLoaded: (ad) => setState(() {
+          banner = ad as BannerAd;
+        }),
+        onAdFailedToLoad: (ad, error) => ad.dispose(),
+      ),
+      request: const AdRequest(),
+    ).load();
   }
   //for quick actions**
 
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
+
+    double size = MediaQuery.of(context).size.width;
 
     if (_gridview == true) {
       setState(() {
@@ -71,6 +92,16 @@ class _HomeScreenState extends State<HomeScreen> {
         viewToolTip = 'Grid View';
       });
     }
+
+    if (size > 1080) {
+      setState(() {
+        _gridview = true;
+        viewIcon = const Icon(Icons.list_rounded);
+        viewToolTip = 'List View';
+        setGridview(_gridview);
+      });
+    }
+
     if (user.isAnonymous) {
       displayName = 'Hello User!';
     } else {
@@ -80,7 +111,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     getOrderBy().then((value) => _orderBy);
     getDescending().then((value) => _descending);
-    getGridview().then((value) => _gridview);
     getFav().then((value) => _fav);
     if (_fav == true) {
       setState(() {
@@ -206,29 +236,30 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: const Text('Sort by:', style: TextStyle(fontSize: 16)),
                     ),
                   ),
-                  PopupMenuItem(
-                    onTap: () {
-                      if (_gridview == true) {
-                        setState(() {
-                          _gridview = false;
-                          viewIcon = const Icon(Icons.grid_view_rounded);
-                          viewToolTip = 'Grid View';
-                          setGridview(_gridview);
-                        });
-                      } else {
-                        setState(() {
-                          _gridview = true;
-                          viewIcon = const Icon(Icons.list_rounded);
-                          viewToolTip = 'List View';
-                          setGridview(_gridview);
-                        });
-                      }
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [Text(viewToolTip, style: const TextStyle(fontSize: 16)), viewIcon],
+                  if (size < 1080)
+                    PopupMenuItem(
+                      onTap: () {
+                        if (_gridview == true) {
+                          setState(() {
+                            _gridview = false;
+                            viewIcon = const Icon(Icons.grid_view_rounded);
+                            viewToolTip = 'Grid View';
+                            setGridview(_gridview);
+                          });
+                        } else {
+                          setState(() {
+                            _gridview = true;
+                            viewIcon = const Icon(Icons.list_rounded);
+                            viewToolTip = 'List View';
+                            setGridview(_gridview);
+                          });
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [Text(viewToolTip, style: const TextStyle(fontSize: 16)), viewIcon],
+                      ),
                     ),
-                  ),
                 ];
               }),
               icon: const Icon(Icons.more_vert),
@@ -249,10 +280,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),*/
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: FloatingActionButton(
-          tooltip: 'New Note',
-          onPressed: () => Navigator.pushNamed(context, 'newNote'),
-          child: const Icon(Icons.add),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 50.0),
+          child: OpenContainer(
+            openBuilder: (context, _) => const NewNote(),
+            closedShape: const CircleBorder(),
+            closedBuilder: (context, VoidCallback openContainer) => Container(
+              height: 50,
+              width: 50,
+              decoration: BoxDecoration(shape: BoxShape.circle, color: color.secondaryContainer),
+              child: Icon(Icons.add, color: color.primary),
+            ),
+          ),
         ),
         drawer: Drawer(
           child: ListView(children: [
@@ -301,49 +340,81 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(6.0),
-          child: StreamBuilder<List>(
-              stream: FireStore().readNotes(orderBy: _orderBy, descending: _descending),
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text(snapshot.error.toString());
-                } else if (snapshot.hasData) {
-                  final notesData = snapshot.data!;
-                  List<Map<String, dynamic>> allNotes = notesData as List<Map<String, dynamic>>;
-                  List<Map<String, dynamic>> filteredNotes = [];
-                  if (searchInput.isEmpty) {
-                    notes = allNotes;
-                    filteredNotes = notes.where((element) => element['deleted'] == false).toList();
-                  } else {
-                    notes = allNotes
-                        .where((element) => utf8
-                            .decode(base64Url.decode(element['title']))
-                            .toString()
-                            .toLowerCase()
-                            .contains(searchInput.toLowerCase()))
-                        .toList();
-                    filteredNotes = notes.where((element) => element['deleted'] == false).toList();
-                  }
-                  if (_fav == true) {
-                    notes = allNotes.where((element) => element['isFav'] == 'true').toList();
-                    filteredNotes = notes.where((element) => element['deleted'] == false).toList();
-                  }
-                  if (_gridview == true) {
-                    if (filteredNotes.isNotEmpty) {
-                      return MyGridView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
+          child: Stack(
+            children: [
+              StreamBuilder<List>(
+                  stream: FireStore().readNotes(orderBy: _orderBy, descending: _descending),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Text(snapshot.error.toString());
+                    } else if (snapshot.hasData) {
+                      final notesData = snapshot.data!;
+                      List<Map<String, dynamic>> allNotes = notesData as List<Map<String, dynamic>>;
+                      List<Map<String, dynamic>> filteredNotes = [];
+                      if (searchInput.isEmpty) {
+                        notes = allNotes;
+                        filteredNotes = notes.where((element) => element['deleted'] == false).toList();
+                      } else {
+                        notes = allNotes
+                            .where((element) => utf8
+                                .decode(base64Url.decode(element['title']))
+                                .toString()
+                                .toLowerCase()
+                                .contains(searchInput.toLowerCase()))
+                            .toList();
+                        filteredNotes = notes.where((element) => element['deleted'] == false).toList();
+                      }
+                      if (_fav == true) {
+                        notes = allNotes.where((element) => element['isFav'] == 'true').toList();
+                        filteredNotes = notes.where((element) => element['deleted'] == false).toList();
+                      }
+                      if (_gridview == true) {
+                        if (filteredNotes.isNotEmpty) {
+                          return MyGridView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
+                        } else {
+                          return const Center(child: Text('No notes found'));
+                        }
+                      } else {
+                        if (filteredNotes.isNotEmpty) {
+                          return MyListView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
+                        } else {
+                          return const Center(child: Text('No notes found'));
+                        }
+                      }
                     } else {
-                      return const Center(child: Text('No notes found'));
+                      return const Center(child: CircularProgressIndicator());
                     }
-                  } else {
-                    if (filteredNotes.isNotEmpty) {
-                      return MyListView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
-                    } else {
-                      return const Center(child: Text('No notes found'));
-                    }
-                  }
-                } else {
-                  return const Center(child: CircularProgressIndicator());
-                }
-              }),
+                  }),
+              if (banner != null && !kIsWeb)
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    height: 55,
+                    width: 325,
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 3,
+                          color: color.primary,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                      border: Border.all(
+                        width: 0.5,
+                        color: color.primary,
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                      color: color.secondaryContainer.withOpacity(0.9),
+                    ),
+                    child: SizedBox(
+                      height: 50,
+                      width: 320,
+                      child: AdWidget(ad: banner!),
+                    ),
+                  ),
+                )
+            ],
+          ),
         ),
       ),
     );

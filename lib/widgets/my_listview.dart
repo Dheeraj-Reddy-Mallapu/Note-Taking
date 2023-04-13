@@ -55,12 +55,12 @@ class MyListView extends StatelessWidget {
           return AnimationConfiguration.staggeredList(
             position: index,
             child: SlideAnimation(
-              duration: const Duration(milliseconds: 1500),
+              duration: const Duration(milliseconds: 1200),
               curve: Curves.fastLinearToSlowEaseIn,
               horizontalOffset: 30,
               verticalOffset: 300,
               child: FlipAnimation(
-                duration: const Duration(milliseconds: 1800),
+                duration: const Duration(milliseconds: 1440),
                 curve: Curves.fastLinearToSlowEaseIn,
                 flipAxis: FlipAxis.y,
                 child: NotesUI(

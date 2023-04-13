@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:animations/animations.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:note_taking_firebase/custom_color.g.dart';
@@ -21,6 +23,8 @@ class NotesUI extends StatelessWidget {
     String title = utf8.decode(base64Url.decode(data['title']));
 
     final color = Theme.of(context).colorScheme;
+    double size = MediaQuery.of(context).size.width;
+
     final customColor = Theme.of(context).extension<CustomColors>()!;
     List<Color> colours = [
       color.secondaryContainer,
@@ -41,37 +45,36 @@ class NotesUI extends StatelessWidget {
       customColor.purple!,
     ];
     int colourIndex = data['color'];
+    double listHeight = 200;
+    if (kIsWeb && size > 880) {
+      listHeight = 300;
+    }
 
     return SizedBox(
-      height: 200,
-      child: Padding(
-        padding: const EdgeInsets.all(6.0),
-        child: Container(
-          alignment: Alignment.topLeft,
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                blurRadius: 3,
+      height: listHeight,
+      child: OpenContainer(
+        openBuilder: (context, _) => openNote,
+        closedShape: const Border(),
+        closedColor: color.background,
+        closedBuilder: (context, VoidCallback openContainer) => Padding(
+          padding: const EdgeInsets.all(6.0),
+          child: Container(
+            alignment: Alignment.topLeft,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  blurRadius: 3,
+                  color: primaryColours[colourIndex],
+                  offset: const Offset(0, 2),
+                )
+              ],
+              border: Border.all(
+                width: 0.5,
                 color: primaryColours[colourIndex],
-                offset: const Offset(0, 2),
-              )
-            ],
-            border: Border.all(
-              width: 0.5,
-              color: primaryColours[colourIndex],
+              ),
+              borderRadius: BorderRadius.circular(15),
+              color: colours[colourIndex].withOpacity(0.9),
             ),
-            borderRadius: BorderRadius.circular(15),
-            color: colours[colourIndex].withOpacity(0.9),
-          ),
-          child: InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => openNote,
-                ),
-              );
-            },
             child: Column(children: [
               if (title.isNotEmpty)
                 Padding(
