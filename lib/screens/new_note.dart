@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:note_taking_firebase/services/database.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
@@ -63,7 +64,7 @@ class _NewNoteState extends State<NewNote> {
         actions: [
           ElevatedButton(
               style: ButtonStyle(foregroundColor: MaterialStatePropertyAll(primaryColours[colourIndex])),
-              onPressed: () {
+              onPressed: () async {
                 final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
                 String encodedT = base64Url.encode(utf8.encode(titleController.text));
                 String encodedC = base64Url.encode(utf8.encode(jsonContent));
@@ -77,7 +78,15 @@ class _NewNoteState extends State<NewNote> {
                       sentBy: '',
                       deleted: false,
                       color: colourIndex);
-                  MySnackbar().show(context, 'SAVED ✅', colours[colourIndex]);
+                  await db.collection(user.uid).doc(id).get().then((value) {
+                    if (value.exists) {
+                      MySnackbar().show(context, 'Successfully SAVED ✅', colours[colourIndex]);
+                      Get.back();
+                    } else {
+                      MySnackbar()
+                          .show(context, 'OOPS! Something went wrong. Please try again ❌', colours[colourIndex]);
+                    }
+                  });
                 } catch (e) {
                   MySnackbar().show(context, e.toString(), color.errorContainer);
                 }

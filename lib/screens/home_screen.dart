@@ -339,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         actions: [ElevatedButton(onPressed: () => Get.back(), child: const Text('Done'))]);
                   },
-                  child: const Text('My QR code')),
+                  child: const Text('My ID - QR code')),
             ),
             Divider(
               color: color.primary,

@@ -146,7 +146,7 @@ class _EditNoteState extends State<EditNote> {
                               title: const Text("Last edited:"),
                               subtitle: Text(widget.data['modifiedAt']),
                             ),
-                            if (widget.data['sentBy'] != null)
+                            if (widget.data['sentBy'] != null && widget.data['sentBy'] != '')
                               ListTile(
                                 title: const Text("Recieved from:"),
                                 subtitle: Text(widget.data['sentBy']),

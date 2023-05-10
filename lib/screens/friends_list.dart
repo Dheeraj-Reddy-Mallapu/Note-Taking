@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:note_taking_firebase/services/database.dart';
-import 'package:share_plus/share_plus.dart';
 
 class FriendsList extends StatelessWidget {
   const FriendsList({super.key});
@@ -66,7 +65,7 @@ class FriendsList extends StatelessWidget {
                             controller: frndNameC,
                             decoration: InputDecoration(
                                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
-                                labelText: 'Choose a nick name'),
+                                labelText: 'Enter a nickname'),
                           ),
                         ),
                         ElevatedButton(
@@ -86,7 +85,7 @@ class FriendsList extends StatelessWidget {
                       ],
                     ));
               },
-              child: const Text('Add a new friend')),
+              child: const Text('Add a new friend +')),
           Expanded(
             child: StreamBuilder<List>(
                 stream: db.getFrndsList(),
@@ -122,7 +121,7 @@ class FriendsList extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
-                                    const Text('Name: '),
+                                    CircleAvatar(child: Text('${index + 1}')),
                                     Text(data['frndName'], style: const TextStyle(fontWeight: FontWeight.bold)),
                                     Row(
                                       children: [
@@ -173,24 +172,24 @@ class FriendsList extends StatelessWidget {
                                     ),
                                   ],
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text('ID: '),
-                                    Text(data['frndUid']),
-                                    TextButton(
-                                        onPressed: () {
-                                          // Clipboard.setData(ClipboardData(text: data['frndUid']));
-                                          // Get.snackbar(
-                                          //   'Friend ID copied to clipboard',
-                                          //   data['frndUid'],
-                                          //   snackPosition: SnackPosition.BOTTOM,
-                                          // );
-                                          Share.share(data['frndUid']);
-                                        },
-                                        child: const Icon(Icons.share)),
-                                  ],
-                                ),
+                                // Row(
+                                //   mainAxisAlignment: MainAxisAlignment.center,
+                                //   children: [
+                                //     const Text('ID: '),
+                                //     Text(data['frndUid']),
+                                //     TextButton(
+                                //         onPressed: () {
+                                //           // Clipboard.setData(ClipboardData(text: data['frndUid']));
+                                //           // Get.snackbar(
+                                //           //   'Friend ID copied to clipboard',
+                                //           //   data['frndUid'],
+                                //           //   snackPosition: SnackPosition.BOTTOM,
+                                //           // );
+                                //           Share.share(data['frndUid']);
+                                //         },
+                                //         child: const Icon(Icons.share)),
+                                //   ],
+                                // ),
                               ],
                             ),
                           ),
