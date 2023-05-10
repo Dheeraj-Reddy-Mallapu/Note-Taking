@@ -1,9 +1,10 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:note_taking_firebase/services/database.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:note_taking_firebase/widgets/my_snackbar.dart';
 import 'package:random_string_generator/random_string_generator.dart';
 
@@ -16,13 +17,18 @@ class NewNote extends StatefulWidget {
 
 class _NewNoteState extends State<NewNote> {
   final titleController = TextEditingController();
-  int colourIndex = 0;
-  late Icon selectedIcon;
-  quill.QuillController contentController = quill.QuillController.basic();
+  q.QuillController contentController = q.QuillController.basic();
 
   var id = RandomStringGenerator(fixedLength: 15).generate();
+
+  late Icon selectedIcon;
+
+  int colourIndex = 0;
+
   @override
   Widget build(BuildContext context) {
+    // final c = NewNoteC();
+
     final color = Theme.of(context).colorScheme;
     final customColor = Theme.of(context).extension<CustomColors>()!;
     List<Color> colours = [
@@ -63,9 +69,15 @@ class _NewNoteState extends State<NewNote> {
                 String encodedC = base64Url.encode(utf8.encode(jsonContent));
 
                 try {
-                  FireStore()
-                      .createNote(id: id, title: encodedT, content: encodedC, deleted: false, color: colourIndex);
-                  MySnackbar().show(context, 'Successfully SAVED ✅', colours[colourIndex]);
+                  FireStore().createNote(
+                      uid: user.uid,
+                      id: id,
+                      title: encodedT,
+                      content: encodedC,
+                      sentBy: '',
+                      deleted: false,
+                      color: colourIndex);
+                  MySnackbar().show(context, 'SAVED ✅', colours[colourIndex]);
                 } catch (e) {
                   MySnackbar().show(context, e.toString(), color.errorContainer);
                 }
@@ -131,18 +143,28 @@ class _NewNoteState extends State<NewNote> {
                   )),
             ),
             Expanded(
-              child: quill.QuillEditor.basic(
+              child: q.QuillEditor.basic(
                 readOnly: false,
                 controller: contentController,
               ),
             ),
-            quill.QuillToolbar.basic(
-              controller: contentController,
-              multiRowsDisplay: false,
-            ),
+            if (!kIsWeb)
+              q.QuillToolbar.basic(
+                controller: contentController,
+                multiRowsDisplay: false,
+              ),
+            if (kIsWeb)
+              q.QuillToolbar.basic(
+                controller: contentController,
+                multiRowsDisplay: true,
+              ),
           ],
         ),
       ),
     );
   }
 }
+
+// class NewNoteC extends GetxController {
+//   RxInt colourIndex = 0.obs;
+// }

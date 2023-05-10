@@ -26,6 +26,6 @@ class _RecycleBinState extends State<RecycleBin> {
           ),
           centerTitle: true,
         ),
-        body: MyGridView(filteredNotes: filteredNotes, searchInput: '', fav: false));
+        body: MyGridView(filteredNotes: filteredNotes, searchInput: '', fav: false, isBin: true));
   }
 }

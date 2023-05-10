@@ -4,15 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:note_taking_firebase/screens/edit_note.dart';
 import 'package:note_taking_firebase/screens/home_screen.dart';
+import 'package:note_taking_firebase/screens/view_note.dart';
 import 'package:note_taking_firebase/services/database.dart';
 import 'package:note_taking_firebase/widgets/notes_ui.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 
 class MyGridView extends StatelessWidget {
-  const MyGridView({super.key, required this.filteredNotes, required this.searchInput, required this.fav});
+  const MyGridView(
+      {super.key, required this.filteredNotes, required this.searchInput, required this.fav, required this.isBin});
   final List<Map<String, dynamic>> filteredNotes;
   final String searchInput;
   final bool fav;
+  final bool isBin;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +54,12 @@ class MyGridView extends StatelessWidget {
             return const HomeScreen();
           }
           if (searchInput.isEmpty) {
+            Widget openNote = EditNote(data: data, content: content);
+            if (isBin == true) {
+              openNote = ViewNote(data: data, content: content);
+            } else {
+              openNote = EditNote(data: data, content: content);
+            }
             return AnimationConfiguration.staggeredGrid(
               position: index,
               columnCount: crossAxisCount,
@@ -63,7 +72,7 @@ class MyGridView extends StatelessWidget {
                   child: NotesUI(
                     data: data,
                     content: content,
-                    openNote: EditNote(data: data, content: content),
+                    openNote: openNote,
                     index: index,
                   ),
                 ),

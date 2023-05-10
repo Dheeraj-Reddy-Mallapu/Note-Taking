@@ -1,11 +1,11 @@
 import 'dart:convert';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
+import 'package:get/get.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:note_taking_firebase/services/database.dart';
 import 'package:note_taking_firebase/widgets/my_snackbar.dart';
-import 'package:random_string_generator/random_string_generator.dart';
 
 class EditNote extends StatefulWidget {
   const EditNote({super.key, required this.data, required this.content});
@@ -17,24 +17,27 @@ class EditNote extends StatefulWidget {
 }
 
 class _EditNoteState extends State<EditNote> {
+  final titleController = TextEditingController();
+  q.QuillController contentController = q.QuillController.basic();
   late String isFav;
   late bool fav;
   late Icon favIcon;
-  String id = RandomStringGenerator(fixedLength: 15).generate();
+
+  final dB = FireStore();
 
   int colourIndex = 0;
   late Icon selectedIcon;
   int dummy = 0;
   @override
   Widget build(BuildContext context) {
-    final titleController = TextEditingController();
-    q.QuillController contentController = q.QuillController.basic();
-    titleController.text = utf8.decode(base64Url.decode(widget.data['title']));
-    final decodeJson = jsonDecode(utf8.decode(base64Url.decode(widget.data['content'])));
-    contentController = q.QuillController(
-      document: q.Document.fromJson(decodeJson),
-      selection: const TextSelection.collapsed(offset: 0),
-    );
+    if (dummy == 0) {
+      titleController.text = utf8.decode(base64Url.decode(widget.data['title']));
+      final decodeJson = jsonDecode(utf8.decode(base64Url.decode(widget.data['content'])));
+      contentController = q.QuillController(
+        document: q.Document.fromJson(decodeJson),
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    }
 
     final color = Theme.of(context).colorScheme;
     final customColor = Theme.of(context).extension<CustomColors>()!;
@@ -92,13 +95,14 @@ class _EditNoteState extends State<EditNote> {
         ),
         actions: [
           ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
                 String encodedT = base64Url.encode(utf8.encode(titleController.text));
                 String encodedC = base64Url.encode(utf8.encode(jsonContent));
                 try {
-                  FireStore().updateNote(id: widget.data['id'], title: encodedT, content: encodedC, color: colourIndex);
-                  MySnackbar().show(context, 'Successfully SAVED ✅', colours[colourIndex]);
+                  await FireStore()
+                      .updateNote(id: widget.data['id'], title: encodedT, content: encodedC, color: colourIndex)
+                      .whenComplete(() => MySnackbar().show(context, 'SAVED ✅', colours[colourIndex]));
                 } catch (e) {
                   MySnackbar().show(context, e.toString(), color.errorContainer);
                 }
@@ -142,11 +146,87 @@ class _EditNoteState extends State<EditNote> {
                               title: const Text("Last edited:"),
                               subtitle: Text(widget.data['modifiedAt']),
                             ),
+                            if (widget.data['sentBy'] != null)
+                              ListTile(
+                                title: const Text("Recieved from:"),
+                                subtitle: Text(widget.data['sentBy']),
+                              ),
                           ],
                         );
                       },
                     ),
                   ),
+                  PopupMenuItem(
+                    child: const Text('Share'),
+                    onTap: () {
+                      showBottomSheet(
+                        backgroundColor: colours[colourIndex],
+                        context: context,
+                        builder: (context) {
+                          return SizedBox(
+                            height: 300,
+                            child: Column(
+                              children: [
+                                const Center(
+                                    child: Text(
+                                  'Send to',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                                )),
+                                Expanded(
+                                  child: StreamBuilder<List>(
+                                      stream: dB.getFrndsList(),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasError) {
+                                          return Text(snapshot.error.toString());
+                                        } else if (snapshot.hasData) {
+                                          final friendsData = snapshot.data!;
+                                          return ListView.builder(
+                                            itemCount: friendsData.length,
+                                            itemBuilder: (context, index) {
+                                              final frndData = friendsData[index];
+                                              return ListTile(
+                                                leading: CircleAvatar(child: Text('${index + 1}')),
+                                                title: Text(frndData['frndName']),
+                                                onTap: () {
+                                                  Get.defaultDialog(
+                                                      backgroundColor: colours[colourIndex],
+                                                      title: frndData['frndName'],
+                                                      content: const Text('Once sent it cannot be unsent.'),
+                                                      actions: [
+                                                        TextButton(
+                                                            onPressed: () {
+                                                              Get.back();
+                                                            },
+                                                            child: const Text('cancel')),
+                                                        ElevatedButton(
+                                                            onPressed: () {
+                                                              dB.createNote(
+                                                                  uid: frndData['frndUid'],
+                                                                  title: widget.data['title'],
+                                                                  content: widget.data['content'],
+                                                                  id: widget.data['id'],
+                                                                  deleted: widget.data['deleted'],
+                                                                  color: widget.data['color'],
+                                                                  sentBy: user.uid);
+                                                            },
+                                                            child: const Text('Send'))
+                                                      ]);
+                                                },
+                                              );
+                                            },
+                                          );
+                                        } else {
+                                          return const Center(child: CircularProgressIndicator());
+                                        }
+                                      }),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  )
                 ];
               })
         ],
@@ -244,10 +324,16 @@ class _EditNoteState extends State<EditNote> {
                 controller: contentController,
               ),
             ),
-            q.QuillToolbar.basic(
-              controller: contentController,
-              multiRowsDisplay: false,
-            ),
+            if (!kIsWeb)
+              q.QuillToolbar.basic(
+                controller: contentController,
+                multiRowsDisplay: false,
+              ),
+            if (kIsWeb)
+              q.QuillToolbar.basic(
+                controller: contentController,
+                multiRowsDisplay: true,
+              ),
           ],
         ),
       ),

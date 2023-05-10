@@ -1,10 +1,12 @@
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:note_taking_firebase/firebase_options.dart';
+import 'package:note_taking_firebase/screens/friends_list.dart';
 import 'package:note_taking_firebase/screens/guide_screen.dart';
 import 'package:note_taking_firebase/screens/new_note.dart';
 import 'package:note_taking_firebase/screens/recycle_bin.dart';
@@ -20,7 +22,7 @@ Future main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
   await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.playIntegrity,
+    androidProvider: AndroidProvider.debug,
     //webRecaptchaSiteKey: recaptchaV3SiteKey,
   );
 
@@ -51,7 +53,7 @@ class MyApp extends StatelessWidget {
 
         return ChangeNotifierProvider(
           create: (context) => GoogleSignInProvider(),
-          child: MaterialApp(
+          child: GetMaterialApp(
             theme: ThemeData(
               useMaterial3: true,
               colorScheme: lightScheme,
@@ -63,11 +65,13 @@ class MyApp extends StatelessWidget {
               extensions: [darkCustomColors],
             ),
             home: const WidgetTree(),
-            routes: {
-              'guide': (context) => const GuideScreen(),
-              'recycleBin': (context) => const RecycleBin(),
-              'newNote': (context) => const NewNote(),
-            },
+            getPages: [
+              GetPage(name: '/Guide', page: () => const GuideScreen()),
+              GetPage(name: '/RecycleBin', page: () => const RecycleBin()),
+              GetPage(name: '/NewNote', page: () => const NewNote()),
+              GetPage(name: '/FriendsList', page: () => const FriendsList()),
+              //GetPage(name: '/ShareScreen', page: () => const ShareScreen()),
+            ],
             debugShowCheckedModeBanner: false,
           ),
         );

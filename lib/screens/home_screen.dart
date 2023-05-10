@@ -3,12 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:note_taking_firebase/screens/new_note.dart';
 import 'package:note_taking_firebase/shares_preferences.dart';
 import 'package:note_taking_firebase/widgets/my_gridview.dart';
 import 'package:note_taking_firebase/widgets/my_list_tile.dart';
 import 'package:note_taking_firebase/widgets/my_listview.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import '../services/database.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:quick_actions/quick_actions.dart';
@@ -300,17 +303,60 @@ class _HomeScreenState extends State<HomeScreen> {
               accountEmail: Text(displayEmail, style: TextStyle(color: color.surface)),
               currentAccountPicture: CircleAvatar(backgroundImage: NetworkImage(photoURL)),
             ),
+            Center(
+              child: TextButton(
+                  onPressed: () {
+                    Get.defaultDialog(
+                        title: 'QR Code',
+                        titleStyle: TextStyle(color: color.primary),
+                        content: Column(
+                          children: [
+                            Center(
+                              child: TextButton(
+                                  onPressed: () {
+                                    // Clipboard.setData(ClipboardData(text: user.uid));
+                                    Get.back();
+                                    // Get.snackbar(
+                                    //   'ID copied to clipboard',
+                                    //   'Share this to a friend',
+                                    //   snackPosition: SnackPosition.BOTTOM,
+                                    // );
+                                    Share.share(user.uid);
+                                  },
+                                  child: Text(user.uid)),
+                            ),
+                            QrImage(
+                              data: user.uid,
+                            ),
+                            Center(
+                              child: Text(
+                                'Scan this QR code or tap on the code above to share',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontWeight: FontWeight.bold, color: color.primary),
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: [ElevatedButton(onPressed: () => Get.back(), child: const Text('Done'))]);
+                  },
+                  child: const Text('My QR code')),
+            ),
             Divider(
               color: color.primary,
               thickness: 0.5,
             ),
             const MyListTile(
-              toScreen: 'recycleBin',
+              toScreen: '/FriendsList',
+              toScreenIcon: Icon(Icons.people_rounded),
+              toScreenTitle: 'Friends',
+            ),
+            const MyListTile(
+              toScreen: '/RecycleBin',
               toScreenIcon: Icon(Icons.recycling_rounded),
               toScreenTitle: 'Recycle Bin',
             ),
             const MyListTile(
-              toScreen: 'guide',
+              toScreen: '/Guide',
               toScreenIcon: Icon(Icons.help_outline_rounded),
               toScreenTitle: 'Guide',
             ),
@@ -370,7 +416,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                       if (_gridview == true) {
                         if (filteredNotes.isNotEmpty) {
-                          return MyGridView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
+                          return MyGridView(
+                              filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav, isBin: false);
                         } else {
                           return const Center(child: Text('No notes found'));
                         }

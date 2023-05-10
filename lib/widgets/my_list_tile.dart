@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class MyListTile extends StatelessWidget {
   const MyListTile({super.key, required this.toScreen, required this.toScreenIcon, required this.toScreenTitle});
@@ -15,8 +16,8 @@ class MyListTile extends StatelessWidget {
             leading: toScreenIcon,
             title: Text(toScreenTitle),
             onTap: () {
-              Navigator.pop(context);
-              Navigator.pushNamed(context, toScreen);
+              Get.back();
+              Get.toNamed(toScreen);
             }),
         Divider(
           color: color.primary,
