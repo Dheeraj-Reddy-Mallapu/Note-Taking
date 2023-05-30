@@ -32,8 +32,6 @@ class FriendsList extends StatelessWidget {
       customColor.purple!,
     ];
 
-    final colourIndex = Random().nextInt(colours.length);
-
     final db = FireStore();
 
     final frndIdC = TextEditingController();
@@ -94,10 +92,14 @@ class FriendsList extends StatelessWidget {
                     return Text(snapshot.error.toString());
                   } else if (snapshot.hasData) {
                     final friendsData = snapshot.data!;
+
                     return ListView.builder(
                       itemCount: friendsData.length,
                       itemBuilder: (context, index) {
                         final data = friendsData[index];
+
+                        final colourIndex = Random().nextInt(colours.length);
+
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
@@ -119,7 +121,7 @@ class FriendsList extends StatelessWidget {
                             child: Column(
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     CircleAvatar(child: Text('${index + 1}')),
                                     Text(data['frndName'], style: const TextStyle(fontWeight: FontWeight.bold)),

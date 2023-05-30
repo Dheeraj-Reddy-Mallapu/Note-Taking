@@ -6,7 +6,6 @@ final user = FirebaseAuth.instance.currentUser!;
 List<Map<String, dynamic>> notes = [];
 
 class FireStore {
-  final time = DateTime.now().toLocal().toString().substring(0, 19);
   Future createNote({
     required String uid,
     required String title,
@@ -18,7 +17,7 @@ class FireStore {
     //required int positionId,
   }) async {
     final docNote = db.collection(uid).doc(id);
-
+    final time = DateTime.now().toLocal().toString().substring(0, 19);
     final json = {
       'id': id,
       'title': title,
@@ -54,7 +53,7 @@ class FireStore {
     required bool deleted,
   }) async {
     final docNote = db.collection(user.uid).doc(id);
-
+    final time = DateTime.now().toLocal().toString().substring(0, 19);
     final json = {
       'deleted': deleted,
       'deletedAt': time,
@@ -68,7 +67,7 @@ class FireStore {
     required bool deleted,
   }) async {
     final docNote = db.collection(user.uid).doc(id);
-
+    final time = DateTime.now().toLocal().toString().substring(0, 19);
     final json = {
       'deleted': deleted,
       'restoredAt': time,
@@ -97,7 +96,7 @@ class FireStore {
     required int color,
   }) async {
     final docNote = db.collection(user.uid).doc(id);
-
+    final time = DateTime.now().toLocal().toString().substring(0, 19);
     docNote.update({
       'title': title,
       'content': content,

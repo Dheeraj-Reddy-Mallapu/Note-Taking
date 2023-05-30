@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:note_taking_firebase/services/database.dart';
 import 'package:note_taking_firebase/widgets/my_snackbar.dart';
+import 'package:random_string_generator/random_string_generator.dart';
 
 class EditNote extends StatefulWidget {
   const EditNote({super.key, required this.data, required this.content});
@@ -22,7 +23,7 @@ class _EditNoteState extends State<EditNote> {
   late String isFav;
   late bool fav;
   late Icon favIcon;
-
+  String id = RandomStringGenerator(fixedLength: 15).generate();
   final dB = FireStore();
 
   int colourIndex = 0;
@@ -199,15 +200,40 @@ class _EditNoteState extends State<EditNote> {
                                                             },
                                                             child: const Text('cancel')),
                                                         ElevatedButton(
-                                                            onPressed: () {
-                                                              dB.createNote(
-                                                                  uid: frndData['frndUid'],
-                                                                  title: widget.data['title'],
-                                                                  content: widget.data['content'],
-                                                                  id: widget.data['id'],
-                                                                  deleted: widget.data['deleted'],
-                                                                  color: widget.data['color'],
-                                                                  sentBy: user.uid);
+                                                            onPressed: () async {
+                                                              dB
+                                                                  .createNote(
+                                                                      uid: frndData['frndUid'],
+                                                                      title: widget.data['title'],
+                                                                      content: widget.data['content'],
+                                                                      id: id,
+                                                                      deleted: widget.data['deleted'],
+                                                                      color: widget.data['color'],
+                                                                      sentBy: user.displayName!)
+                                                                  .whenComplete(() => db
+                                                                          .collection(user.uid)
+                                                                          .doc(widget.data['id'])
+                                                                          .update({
+                                                                        'sentToName': frndData['frndName'],
+                                                                        'sentToID': frndData['frndUid'],
+                                                                      }));
+                                                              await db
+                                                                  .collection(frndData['frndUid'])
+                                                                  .doc(id)
+                                                                  .get()
+                                                                  .then((value) {
+                                                                if (value.exists) {
+                                                                  MySnackbar().show(context, 'Successfully SAVED ✅',
+                                                                      colours[colourIndex]);
+                                                                  Get.back();
+                                                                } else {
+                                                                  MySnackbar().show(
+                                                                      context,
+                                                                      'OOPS! Something went wrong. Please try again ❌',
+                                                                      colours[colourIndex]);
+                                                                }
+                                                              });
+                                                              Get.back();
                                                             },
                                                             child: const Text('Send'))
                                                       ]);

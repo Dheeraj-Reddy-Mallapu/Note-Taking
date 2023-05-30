@@ -20,7 +20,7 @@ class _NewNoteState extends State<NewNote> {
   final titleController = TextEditingController();
   q.QuillController contentController = q.QuillController.basic();
 
-  var id = RandomStringGenerator(fixedLength: 15).generate();
+  String id = RandomStringGenerator(fixedLength: 15).generate();
 
   late Icon selectedIcon;
 

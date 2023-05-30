@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //for Ads
     BannerAd(
       size: AdSize.banner,
-      adUnitId: 'ca-app-pub-5541125993552460/7474212401',
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111', //3940256099942544/6300978111, 5541125993552460/7474212401
       listener: BannerAdListener(
         onAdLoaded: (ad) => setState(() {
           banner = ad as BannerAd;
@@ -311,26 +311,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         titleStyle: TextStyle(color: color.primary),
                         content: Column(
                           children: [
-                            Center(
-                              child: TextButton(
-                                  onPressed: () {
-                                    // Clipboard.setData(ClipboardData(text: user.uid));
-                                    Get.back();
-                                    // Get.snackbar(
-                                    //   'ID copied to clipboard',
-                                    //   'Share this to a friend',
-                                    //   snackPosition: SnackPosition.BOTTOM,
-                                    // );
-                                    Share.share(user.uid);
-                                  },
-                                  child: Text(user.uid)),
-                            ),
-                            QrImage(
-                              data: user.uid,
+                            GestureDetector(
+                              child: QrImage(
+                                data: user.uid,
+                              ),
+                              onTap: () => Share.share(user.uid),
                             ),
                             Center(
                               child: Text(
-                                'Scan this QR code or tap on the code above to share',
+                                'Scan or tap the QR code to share',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(fontWeight: FontWeight.bold, color: color.primary),
                               ),
@@ -339,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         actions: [ElevatedButton(onPressed: () => Get.back(), child: const Text('Done'))]);
                   },
-                  child: const Text('My ID - QR code')),
+                  child: const Text('My Unique code')),
             ),
             Divider(
               color: color.primary,
