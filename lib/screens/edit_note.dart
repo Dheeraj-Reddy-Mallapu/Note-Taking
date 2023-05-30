@@ -23,7 +23,6 @@ class _EditNoteState extends State<EditNote> {
   late String isFav;
   late bool fav;
   late Icon favIcon;
-  String id = RandomStringGenerator(fixedLength: 15).generate();
   final dB = FireStore();
 
   int colourIndex = 0;
@@ -201,6 +200,8 @@ class _EditNoteState extends State<EditNote> {
                                                             child: const Text('cancel')),
                                                         ElevatedButton(
                                                             onPressed: () async {
+                                                              String id =
+                                                                  RandomStringGenerator(fixedLength: 15).generate();
                                                               dB
                                                                   .createNote(
                                                                       uid: frndData['frndUid'],

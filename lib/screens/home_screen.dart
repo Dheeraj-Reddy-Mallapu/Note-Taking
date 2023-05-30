@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:note_taking_firebase/screens/new_note.dart';
@@ -312,9 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         content: Column(
                           children: [
                             GestureDetector(
-                              child: QrImage(
-                                data: user.uid,
-                              ),
+                              child: QrImageView(data: user.uid),
                               onTap: () => Share.share(user.uid),
                             ),
                             Center(
@@ -357,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   showAboutDialog(
                       context: context,
                       applicationName: 'Note Taking',
-                      applicationIcon: SvgPicture.asset('assets/notes.svg', height: 40),
+                      applicationIcon: Image.asset('assets/notes.png', height: 40),
                       children: [
                         const ListTile(
                           title: Text('Open Source Project'),

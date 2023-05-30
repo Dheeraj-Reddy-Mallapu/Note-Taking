@@ -32,7 +32,7 @@ class FriendsList extends StatelessWidget {
       customColor.purple!,
     ];
 
-    final db = FireStore();
+    final dB = FireStore();
 
     final frndIdC = TextEditingController();
     final frndNameC = TextEditingController();
@@ -67,10 +67,19 @@ class FriendsList extends StatelessWidget {
                           ),
                         ),
                         ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
                               if (frndIdC.text.length == 28) {
-                                db.addFriend(frndName: frndNameC.text, frndUid: frndIdC.text);
-                                Get.back();
+                                final snapshot = await db.collection(frndIdC.text).get();
+                                if (snapshot.size != 0) {
+                                  dB.addFriend(frndName: frndNameC.text, frndUid: frndIdC.text);
+                                  Get.back();
+                                } else {
+                                  Get.snackbar(
+                                    'Oops!',
+                                    'Please check the code again',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                  );
+                                }
                               } else {
                                 Get.snackbar(
                                   'Oops!',
@@ -83,10 +92,10 @@ class FriendsList extends StatelessWidget {
                       ],
                     ));
               },
-              child: const Text('Add a new friend +')),
+              child: const Text('Add a friend')),
           Expanded(
             child: StreamBuilder<List>(
-                stream: db.getFrndsList(),
+                stream: dB.getFrndsList(),
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     return Text(snapshot.error.toString());
@@ -141,7 +150,7 @@ class FriendsList extends StatelessWidget {
                                                         child: const Text('Cancel')),
                                                     ElevatedButton(
                                                         onPressed: () {
-                                                          db.updateFrndName(
+                                                          dB.updateFrndName(
                                                               frndName: editNameC.text, frndUid: data['frndUid']);
                                                           Get.back();
                                                         },
@@ -162,7 +171,7 @@ class FriendsList extends StatelessWidget {
                                                       child: const Text('Cancel')),
                                                   ElevatedButton(
                                                       onPressed: () {
-                                                        db.removeFrnd(frndUid: data['frndUid']);
+                                                        dB.removeFrnd(frndUid: data['frndUid']);
                                                         Get.back();
                                                       },
                                                       child: const Text('Remove'))

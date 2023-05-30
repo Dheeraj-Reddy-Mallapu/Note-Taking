@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:note_taking_firebase/services/google_signin.dart';
 import 'package:provider/provider.dart';
 
@@ -28,7 +27,7 @@ class WelcomeScreen extends StatelessWidget {
               child: SizedBox(
                 height: 300,
                 width: 300,
-                child: SvgPicture.asset('assets/notes.svg'),
+                child: Image.asset('assets/notes.png'),
               ),
               onLongPress: () => showDialog(
                     context: context,
@@ -48,7 +47,7 @@ class WelcomeScreen extends StatelessWidget {
           const SizedBox(height: 25),
           ElevatedButton.icon(
             label: const Text('SignIn'),
-            icon: SvgPicture.asset('assets/google.svg', height: 20),
+            icon: Image.asset('assets/google.png', height: 20),
             onPressed: () async {
               final provider = Provider.of<GoogleSignInProvider>(context, listen: false);
               await provider.googleLogin();
