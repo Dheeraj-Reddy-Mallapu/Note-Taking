@@ -51,21 +51,26 @@ class _HomeScreenState extends State<HomeScreen> {
   //**for quick actions
   final quickActions = const QuickActions();
   @override
-  void initState() {
+  void initState() async {
     super.initState();
+
+    _orderBy = await getOrderBy();
+    _descending = await getDescending();
+    _fav = await getFav();
+
     quickActions.setShortcutItems([
       const ShortcutItem(type: 'note', localizedTitle: 'New Note', icon: 'add'),
     ]);
     quickActions.initialize((type) {
       if (type == 'note') {
-        Navigator.pushNamed(context, 'newNote');
+        Get.to(const NewNote());
       }
     });
 
     //for Ads
     BannerAd(
       size: AdSize.banner,
-      adUnitId: 'ca-app-pub-3940256099942544/6300978111', //3940256099942544/6300978111, 5541125993552460/7474212401
+      adUnitId: 'ca-app-pub-5541125993552460/7474212401', //3940256099942544/6300978111, 5541125993552460/7474212401
       listener: BannerAdListener(
         onAdLoaded: (ad) => setState(() {
           banner = ad as BannerAd;
@@ -111,9 +116,6 @@ class _HomeScreenState extends State<HomeScreen> {
       photoURL = user.photoURL!;
       displayEmail = user.email!;
     }
-    getOrderBy().then((value) => _orderBy);
-    getDescending().then((value) => _descending);
-    getFav().then((value) => _fav);
     if (_fav == true) {
       setState(() {
         favIcon = const Icon(

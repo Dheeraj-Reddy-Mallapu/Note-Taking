@@ -1,4 +1,5 @@
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
@@ -18,12 +19,14 @@ import 'color_schemes.g.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MobileAds.instance.initialize();
+  if (!kIsWeb) {
+    MobileAds.instance.initialize();
+  }
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
   await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.debug,
-    //webRecaptchaSiteKey: recaptchaV3SiteKey,
+    androidProvider: AndroidProvider.playIntegrity,
+    // webRecaptchaSiteKey: recaptchaV3SiteKey,
   );
 
   runApp(const MyApp());
@@ -72,7 +75,6 @@ class MyApp extends StatelessWidget {
               GetPage(name: '/FriendsList', page: () => const FriendsList()),
               //GetPage(name: '/ShareScreen', page: () => const ShareScreen()),
             ],
-            debugShowCheckedModeBanner: false,
           ),
         );
       }),
