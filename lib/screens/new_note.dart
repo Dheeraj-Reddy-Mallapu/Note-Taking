@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:note_taking_firebase/services/database.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
@@ -80,15 +80,13 @@ class _NewNoteState extends State<NewNote> {
                       color: colourIndex);
                   await db.collection(user.uid).doc(id).get().then((value) {
                     if (value.exists) {
-                      MySnackbar().show(context, 'Successfully SAVED ✅', colours[colourIndex]);
-                      Get.back();
+                      mySnackBar(context, 'Hurray!', 'Successfully SAVED', ContentType.success);
                     } else {
-                      MySnackbar()
-                          .show(context, 'OOPS! Something went wrong. Please try again ❌', colours[colourIndex]);
+                      mySnackBar(context, 'Oh Snap!', 'Something went wrong. Please try again', ContentType.failure);
                     }
                   });
                 } catch (e) {
-                  MySnackbar().show(context, e.toString(), color.errorContainer);
+                  mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
                 }
               },
               child: const Text('SAVE'))

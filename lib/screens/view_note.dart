@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:note_taking_firebase/services/database.dart';
@@ -52,7 +53,7 @@ class ViewNote extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {
                           FireStore().deleteNote(id: data['id']).then((value) => Navigator.pop(context));
-                          MySnackbar().show(context, 'Deleted the note permanently!', color.secondaryContainer);
+                          mySnackBar(context, 'Hey!', 'Deleted the note permanently!', ContentType.warning);
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
@@ -99,7 +100,7 @@ class ViewNote extends StatelessWidget {
             ElevatedButton(
                 onPressed: () {
                   FireStore().restoreNote(id: data['id'], deleted: false);
-                  MySnackbar().show(context, 'Restored the Note', color.secondaryContainer);
+                  mySnackBar(context, 'Hurray!', 'Successfully restored the Note', ContentType.success);
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },

@@ -50,13 +50,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //**for quick actions
   final quickActions = const QuickActions();
-  @override
-  void initState() async {
-    super.initState();
 
+  // init Shared Preferences
+  initSharedPrefs() async {
     _orderBy = await getOrderBy();
     _descending = await getDescending();
     _fav = await getFav();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    initSharedPrefs();
 
     quickActions.setShortcutItems([
       const ShortcutItem(type: 'note', localizedTitle: 'New Note', icon: 'add'),
@@ -70,7 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
     //for Ads
     BannerAd(
       size: AdSize.banner,
-      adUnitId: 'ca-app-pub-5541125993552460/7474212401', //3940256099942544/6300978111, 5541125993552460/7474212401
+      adUnitId: 'ca-app-pub-5541125993552460/7474212401', // release
+      // adUnitId: 'ca-app-pub-3940256099942544/6300978111', // debug
       listener: BannerAdListener(
         onAdLoaded: (ad) => setState(() {
           banner = ad as BannerAd;

@@ -1,8 +1,7 @@
-import 'dart:math';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note_taking_firebase/custom_color.g.dart';
+import 'package:note_taking_firebase/screens/qr_scanner.dart';
 import 'package:note_taking_firebase/services/database.dart';
 
 class FriendsList extends StatelessWidget {
@@ -11,26 +10,6 @@ class FriendsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
-
-    final customColor = Theme.of(context).extension<CustomColors>()!;
-    List<Color> colours = [
-      color.secondaryContainer,
-      customColor.greenishblueContainer!,
-      customColor.yellowishgreenContainer!,
-      customColor.yellowishbrownContainer!,
-      customColor.pinkishredContainer!,
-      customColor.blueContainer!,
-      customColor.purpleContainer!,
-    ];
-    List<Color> primaryColours = [
-      color.primary,
-      customColor.greenishblue!,
-      customColor.yellowishgreen!,
-      customColor.yellowishbrown!,
-      customColor.pinkishred!,
-      customColor.blue!,
-      customColor.purple!,
-    ];
 
     final dB = FireStore();
 
@@ -48,6 +27,14 @@ class FriendsList extends StatelessWidget {
                     title: 'Add a friend',
                     content: Column(
                       children: [
+                        if (!kIsWeb)
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Get.to(() => QRScan(frndIdC: frndIdC));
+                            },
+                            icon: const Icon(Icons.qr_code),
+                            label: const Text('Scan QR'),
+                          ),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: TextFormField(
@@ -107,32 +94,26 @@ class FriendsList extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final data = friendsData[index];
 
-                        final colourIndex = Random().nextInt(colours.length);
-
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
                             decoration: BoxDecoration(
-                              boxShadow: [
-                                BoxShadow(
-                                  blurRadius: 3,
-                                  color: primaryColours[colourIndex],
-                                  offset: const Offset(0, 2),
-                                )
-                              ],
+                              boxShadow: [BoxShadow(blurRadius: 2, offset: const Offset(0, 2), color: color.primary)],
                               border: Border.all(
                                 width: 0.5,
-                                color: primaryColours[colourIndex],
                               ),
                               borderRadius: BorderRadius.circular(15),
-                              color: colours[colourIndex].withOpacity(0.9),
+                              color: color.primaryContainer.withOpacity(0.9),
                             ),
                             child: Column(
                               children: [
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    CircleAvatar(child: Text('${index + 1}')),
+                                    Padding(
+                                      padding: const EdgeInsets.all(4.0),
+                                      child: CircleAvatar(child: Text('${index + 1}')),
+                                    ),
                                     Text(data['frndName'], style: const TextStyle(fontWeight: FontWeight.bold)),
                                     Row(
                                       children: [

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
@@ -102,9 +103,9 @@ class _EditNoteState extends State<EditNote> {
                 try {
                   await FireStore()
                       .updateNote(id: widget.data['id'], title: encodedT, content: encodedC, color: colourIndex)
-                      .whenComplete(() => MySnackbar().show(context, 'SAVED ✅', colours[colourIndex]));
+                      .whenComplete(() => mySnackBar(context, 'Hurray!', 'Successfully SAVED', ContentType.success));
                 } catch (e) {
-                  MySnackbar().show(context, e.toString(), color.errorContainer);
+                  mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
                 }
               },
               child: Text(
@@ -122,12 +123,10 @@ class _EditNoteState extends State<EditNote> {
                     ),
                     onTap: () {
                       try {
-                        FireStore()
-                            .createBinNote(id: widget.data['id'], deleted: true)
-                            .whenComplete(() => Navigator.pop(context));
-                        MySnackbar().show(context, 'Moved to Recycle Bin ✅', colours[colourIndex]);
+                        FireStore().createBinNote(id: widget.data['id'], deleted: true).whenComplete(() => Get.back());
+                        mySnackBar(context, 'Hey!', 'Moved to Recycle Bin', ContentType.success);
                       } catch (e) {
-                        MySnackbar().show(context, e.toString(), color.errorContainer);
+                        mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
                       }
                     },
                   ),
@@ -159,98 +158,96 @@ class _EditNoteState extends State<EditNote> {
                   PopupMenuItem(
                     child: const Text('Share'),
                     onTap: () {
-                      showBottomSheet(
+                      Get.bottomSheet(
                         backgroundColor: colours[colourIndex],
-                        context: context,
-                        builder: (context) {
-                          return SizedBox(
-                            height: 300,
-                            child: Column(
-                              children: [
-                                const Center(
-                                    child: Text(
-                                  'Send to',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                                )),
-                                Expanded(
-                                  child: StreamBuilder<List>(
-                                      stream: dB.getFrndsList(),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.hasError) {
-                                          return Text(snapshot.error.toString());
-                                        } else if (snapshot.hasData) {
-                                          final friendsData = snapshot.data!;
-                                          return ListView.builder(
-                                            itemCount: friendsData.length,
-                                            itemBuilder: (context, index) {
-                                              final frndData = friendsData[index];
-                                              return ListTile(
-                                                leading: CircleAvatar(child: Text('${index + 1}')),
-                                                title: Text(frndData['frndName']),
-                                                onTap: () {
-                                                  Get.defaultDialog(
-                                                      backgroundColor: colours[colourIndex],
-                                                      title: frndData['frndName'],
-                                                      content: const Text('Once sent it cannot be unsent.'),
-                                                      actions: [
-                                                        TextButton(
-                                                            onPressed: () {
-                                                              Get.back();
-                                                            },
-                                                            child: const Text('cancel')),
-                                                        ElevatedButton(
-                                                            onPressed: () async {
-                                                              String id =
-                                                                  RandomStringGenerator(fixedLength: 15).generate();
-                                                              dB
-                                                                  .createNote(
-                                                                      uid: frndData['frndUid'],
-                                                                      title: widget.data['title'],
-                                                                      content: widget.data['content'],
-                                                                      id: id,
-                                                                      deleted: widget.data['deleted'],
-                                                                      color: widget.data['color'],
-                                                                      sentBy: user.displayName!)
-                                                                  .whenComplete(() => db
-                                                                          .collection(user.uid)
-                                                                          .doc(widget.data['id'])
-                                                                          .update({
-                                                                        'sentToName': frndData['frndName'],
-                                                                        'sentToID': frndData['frndUid'],
-                                                                      }));
-                                                              await db
-                                                                  .collection(frndData['frndUid'])
-                                                                  .doc(id)
-                                                                  .get()
-                                                                  .then((value) {
-                                                                if (value.exists) {
-                                                                  MySnackbar().show(context, 'Successfully SAVED ✅',
-                                                                      colours[colourIndex]);
-                                                                  Get.back();
-                                                                } else {
-                                                                  MySnackbar().show(
-                                                                      context,
-                                                                      'OOPS! Something went wrong. Please try again ❌',
-                                                                      colours[colourIndex]);
-                                                                }
-                                                              });
-                                                              Get.back();
-                                                            },
-                                                            child: const Text('Send'))
-                                                      ]);
-                                                },
-                                              );
-                                            },
-                                          );
-                                        } else {
-                                          return const Center(child: CircularProgressIndicator());
-                                        }
-                                      }),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                        SizedBox(
+                          height: 300,
+                          child: Column(
+                            children: [
+                              const Center(
+                                  child: Text(
+                                'Send to',
+                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                              )),
+                              Expanded(
+                                child: StreamBuilder<List>(
+                                    stream: dB.getFrndsList(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasError) {
+                                        return Text(snapshot.error.toString());
+                                      } else if (snapshot.hasData) {
+                                        final friendsData = snapshot.data!;
+                                        return ListView.builder(
+                                          itemCount: friendsData.length,
+                                          itemBuilder: (context, index) {
+                                            final frndData = friendsData[index];
+                                            return ListTile(
+                                              leading: CircleAvatar(child: Text('${index + 1}')),
+                                              title: Text(frndData['frndName']),
+                                              onTap: () {
+                                                Get.defaultDialog(
+                                                    backgroundColor: colours[colourIndex],
+                                                    title: frndData['frndName'],
+                                                    content: const Text('Once sent it cannot be unsent.'),
+                                                    actions: [
+                                                      TextButton(
+                                                          onPressed: () {
+                                                            Get.back();
+                                                          },
+                                                          child: const Text('cancel')),
+                                                      ElevatedButton(
+                                                          onPressed: () async {
+                                                            String id =
+                                                                RandomStringGenerator(fixedLength: 15).generate();
+                                                            dB
+                                                                .createNote(
+                                                                    uid: frndData['frndUid'],
+                                                                    title: widget.data['title'],
+                                                                    content: widget.data['content'],
+                                                                    id: id,
+                                                                    deleted: widget.data['deleted'],
+                                                                    color: widget.data['color'],
+                                                                    sentBy: user.displayName!)
+                                                                .whenComplete(() => db
+                                                                        .collection(user.uid)
+                                                                        .doc(widget.data['id'])
+                                                                        .update({
+                                                                      'sentToName': frndData['frndName'],
+                                                                      'sentToID': frndData['frndUid'],
+                                                                    }));
+                                                            await db
+                                                                .collection(frndData['frndUid'])
+                                                                .doc(id)
+                                                                .get()
+                                                                .then((value) {
+                                                              if (value.exists) {
+                                                                mySnackBar(context, 'Hurray!', 'Successfully SAVED',
+                                                                    ContentType.success);
+                                                                Get.back();
+                                                              } else {
+                                                                mySnackBar(
+                                                                    context,
+                                                                    'Oops!',
+                                                                    'Something went wrong. Please try again',
+                                                                    ContentType.failure);
+                                                              }
+                                                            });
+                                                            Get.back();
+                                                          },
+                                                          child: const Text('Send'))
+                                                    ]);
+                                              },
+                                            );
+                                          },
+                                        );
+                                      } else {
+                                        return const Center(child: CircularProgressIndicator());
+                                      }
+                                    }),
+                              ),
+                            ],
+                          ),
+                        ),
                       );
                     },
                   )
@@ -323,14 +320,14 @@ class _EditNoteState extends State<EditNote> {
                         favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
                         dummy++;
                       });
-                      MySnackbar().show(context, 'Added to Favorites ✅', colours[colourIndex]);
+                      mySnackBar(context, 'Hurray!', 'Successfully added to Favorites', ContentType.success);
                     } else if (isFav == 'true') {
                       setState(() {
                         isFav = 'false';
                         favIcon = const Icon(Icons.favorite_border);
                         dummy++;
                       });
-                      MySnackbar().show(context, 'Removed from Favorites ❌', color.secondaryContainer);
+                      mySnackBar(context, 'Hey!', 'Removed from Favorites', ContentType.success);
                     }
                     db.collection(user.uid).doc(widget.data['id']).update({'isFav': isFav});
                   },

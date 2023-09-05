@@ -23,10 +23,10 @@ Future main() async {
     MobileAds.instance.initialize();
   }
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.android);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseAppCheck.instance.activate(
     androidProvider: AndroidProvider.playIntegrity,
-    // webRecaptchaSiteKey: recaptchaV3SiteKey,
+    webRecaptchaSiteKey: recaptchaV3SiteKey,
   );
 
   runApp(const MyApp());
