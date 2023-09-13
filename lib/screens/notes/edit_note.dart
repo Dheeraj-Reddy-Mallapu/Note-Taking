@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:get/get.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
-import 'package:note_taking_firebase/services/database.dart';
+import 'package:note_taking_firebase/services/firestore.dart';
 import 'package:note_taking_firebase/widgets/my_snackbar.dart';
 import 'package:random_string_generator/random_string_generator.dart';
 

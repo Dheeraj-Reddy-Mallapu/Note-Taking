@@ -18,6 +18,7 @@ class FireStore {
   }) async {
     final docNote = db.collection(uid).doc(id);
     final time = DateTime.now().toLocal().toString().substring(0, 19);
+
     final json = {
       'id': id,
       'title': title,
@@ -26,9 +27,30 @@ class FireStore {
       'deleted': deleted,
       'createdAt': time,
       'modifiedAt': time,
-      'deletedAt': time,
+      'deletedAt': '',
       'color': color,
       //'positionId': positionId,
+    };
+
+    await docNote.set(json);
+  }
+
+  Future saveDrawingId({
+    required String id,
+    required String title,
+    required String url,
+  }) async {
+    final docNote = db.collection(user.uid).doc('drawings').collection('list').doc(id);
+
+    final time = DateTime.now().toLocal().toString().substring(0, 19);
+
+    final json = {
+      'id': id,
+      'title': title,
+      'url': url,
+      'deleted': false,
+      'createdAt': time,
+      'modifiedAt': time,
     };
 
     await docNote.set(json);
@@ -85,6 +107,13 @@ class FireStore {
   Stream<List> getFrndsList() => db
       .collection(user.uid)
       .doc('friends')
+      .collection('list')
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+
+  Stream<List> readDrawings() => db
+      .collection(user.uid)
+      .doc('drawings')
       .collection('list')
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());

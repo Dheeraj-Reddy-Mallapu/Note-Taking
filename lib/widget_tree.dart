@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:note_taking_firebase/screens/home_screen.dart';
+import 'package:note_taking_firebase/screens/main_screen.dart';
 import 'package:note_taking_firebase/screens/welcome_screen.dart';
 
 class WidgetTree extends StatelessWidget {
@@ -14,7 +14,7 @@ class WidgetTree extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasData) {
-          return const HomeScreen();
+          return const MainScreen(pageIndex: 1);
         } else if (snapshot.hasError) {
           return const Center(
             child: Text('Something Went Wrong!'),

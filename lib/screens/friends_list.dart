@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:note_taking_firebase/screens/qr_scanner.dart';
-import 'package:note_taking_firebase/services/database.dart';
+import 'package:note_taking_firebase/services/firestore.dart';
 
 class FriendsList extends StatelessWidget {
   const FriendsList({super.key});
@@ -23,7 +23,11 @@ class FriendsList extends StatelessWidget {
         children: [
           ElevatedButton(
               onPressed: () {
+                bool shouldPop = false;
                 Get.defaultDialog(
+                    onWillPop: () async {
+                      return shouldPop;
+                    },
                     title: 'Add a friend',
                     content: Column(
                       children: [
@@ -53,31 +57,42 @@ class FriendsList extends StatelessWidget {
                                 labelText: 'Enter a nickname'),
                           ),
                         ),
-                        ElevatedButton(
-                            onPressed: () async {
-                              if (frndIdC.text.length == 28) {
-                                final snapshot = await db.collection(frndIdC.text).get();
-                                if (snapshot.size != 0) {
-                                  dB.addFriend(frndName: frndNameC.text, frndUid: frndIdC.text);
-                                  Get.back();
-                                } else {
-                                  Get.snackbar(
-                                    'Oops!',
-                                    'Please check the code again',
-                                    snackPosition: SnackPosition.BOTTOM,
-                                  );
-                                }
-                              } else {
-                                Get.snackbar(
-                                  'Oops!',
-                                  'Please enter 28 digit code',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                );
-                              }
-                            },
-                            child: const Text('Add')),
                       ],
-                    ));
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          shouldPop = true;
+                          Get.back();
+                        },
+                        child: const Text('Cancel'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (frndIdC.text.length == 28) {
+                            final snapshot = await db.collection(frndIdC.text).get();
+                            if (snapshot.size != 0) {
+                              dB.addFriend(frndName: frndNameC.text, frndUid: frndIdC.text);
+                              shouldPop = true;
+                              Get.back();
+                            } else {
+                              Get.snackbar(
+                                'Oops!',
+                                'Please check the code again',
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                            }
+                          } else {
+                            Get.snackbar(
+                              'Oops!',
+                              'Please enter 28 digit code',
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
+                        },
+                        child: const Text('Add'),
+                      ),
+                    ]);
               },
               child: const Text('Add a friend')),
           Expanded(

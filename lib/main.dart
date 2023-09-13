@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:note_taking_firebase/firebase_options.dart';
 import 'package:note_taking_firebase/screens/friends_list.dart';
 import 'package:note_taking_firebase/screens/guide_screen.dart';
-import 'package:note_taking_firebase/screens/new_note.dart';
-import 'package:note_taking_firebase/screens/recycle_bin.dart';
+import 'package:note_taking_firebase/screens/notes/new_note.dart';
+import 'package:note_taking_firebase/screens/notes/recycle_bin.dart';
 import 'package:note_taking_firebase/services/google_signin.dart';
 import 'package:note_taking_firebase/widget_tree.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +25,7 @@ Future main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.playIntegrity,
+    androidProvider: AndroidProvider.debug,
     webRecaptchaSiteKey: recaptchaV3SiteKey,
   );
 

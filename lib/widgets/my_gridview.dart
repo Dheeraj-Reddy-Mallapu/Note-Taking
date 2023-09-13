@@ -2,10 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:note_taking_firebase/screens/edit_note.dart';
-import 'package:note_taking_firebase/screens/home_screen.dart';
-import 'package:note_taking_firebase/screens/view_note.dart';
-import 'package:note_taking_firebase/services/database.dart';
+import 'package:note_taking_firebase/screens/notes/edit_note.dart';
+import 'package:note_taking_firebase/screens/notes/notes.dart';
+import 'package:note_taking_firebase/screens/notes/view_note.dart';
+import 'package:note_taking_firebase/services/firestore.dart';
 import 'package:note_taking_firebase/widgets/notes_ui.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 
@@ -51,7 +51,7 @@ class MyGridView extends StatelessWidget {
           );
           if (data['color'] == null) {
             db.collection(user.uid).doc(data['id']).update({'color': 0});
-            return const HomeScreen();
+            return const Notes();
           }
           if (searchInput.isEmpty) {
             Widget openNote = EditNote(data: data, content: content);

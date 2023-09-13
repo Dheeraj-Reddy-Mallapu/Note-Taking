@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:note_taking_firebase/services/database.dart';
+import 'package:note_taking_firebase/services/firestore.dart';
 import 'package:note_taking_firebase/widgets/my_gridview.dart';
 
 class RecycleBin extends StatefulWidget {

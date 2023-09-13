@@ -3,27 +3,27 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:note_taking_firebase/screens/new_note.dart';
+import 'package:note_taking_firebase/screens/drawings/new_drawing.dart';
+import 'package:note_taking_firebase/screens/notes/new_note.dart';
 import 'package:note_taking_firebase/shares_preferences.dart';
 import 'package:note_taking_firebase/widgets/my_gridview.dart';
 import 'package:note_taking_firebase/widgets/my_list_tile.dart';
 import 'package:note_taking_firebase/widgets/my_listview.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-import '../services/database.dart';
+import '../../services/firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:quick_actions/quick_actions.dart';
 import 'package:animations/animations.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class Notes extends StatefulWidget {
+  const Notes({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<Notes> createState() => _NotesState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _NotesState extends State<Notes> {
   final user = FirebaseAuth.instance.currentUser!;
   String displayName = '';
   String photoURL = '';
@@ -46,16 +46,15 @@ class _HomeScreenState extends State<HomeScreen> {
   final searchController = TextEditingController();
   String searchInput = '';
 
-  BannerAd? banner;
-
-  //**for quick actions
+  // for quick actions
   final quickActions = const QuickActions();
 
-  // init Shared Preferences
+  // initialize Shared Preferences
   initSharedPrefs() async {
     _orderBy = await getOrderBy();
     _descending = await getDescending();
     _fav = await getFav();
+    _gridview = await getGridview();
   }
 
   @override
@@ -64,30 +63,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
     initSharedPrefs();
 
-    quickActions.setShortcutItems([
-      const ShortcutItem(type: 'note', localizedTitle: 'New Note', icon: 'add'),
-    ]);
-    quickActions.initialize((type) {
-      if (type == 'note') {
-        Get.to(const NewNote());
-      }
-    });
-
-    //for Ads
-    BannerAd(
-      size: AdSize.banner,
-      adUnitId: 'ca-app-pub-5541125993552460/7474212401', // release
-      // adUnitId: 'ca-app-pub-3940256099942544/6300978111', // debug
-      listener: BannerAdListener(
-        onAdLoaded: (ad) => setState(() {
-          banner = ad as BannerAd;
-        }),
-        onAdFailedToLoad: (ad, error) => ad.dispose(),
-      ),
-      request: const AdRequest(),
-    ).load();
+    //for quick actions
+    if (!kIsWeb) {
+      quickActions.setShortcutItems([
+        const ShortcutItem(type: 'note', localizedTitle: 'New Note', icon: 'add'),
+      ]);
+      quickActions.initialize((type) {
+        if (type == 'note') {
+          Get.to(const NewNote());
+        }
+      });
+    }
   }
-  //for quick actions**
 
   @override
   Widget build(BuildContext context) {
@@ -271,6 +258,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [Text(viewToolTip, style: const TextStyle(fontSize: 16)), viewIcon],
                       ),
                     ),
+                  PopupMenuItem(
+                    onTap: () {
+                      Get.to(() => const NewDrawing());
+                    },
+                    child: const Text('drawing'),
+                  ),
                 ];
               }),
               icon: const Icon(Icons.more_vert),
@@ -379,85 +372,49 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ]),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(6.0),
-          child: Stack(
-            children: [
-              StreamBuilder<List>(
-                  stream: FireStore().readNotes(orderBy: _orderBy, descending: _descending),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return Text(snapshot.error.toString());
-                    } else if (snapshot.hasData) {
-                      final notesData = snapshot.data!;
-                      List<Map<String, dynamic>> allNotes = notesData as List<Map<String, dynamic>>;
-                      List<Map<String, dynamic>> filteredNotes = [];
-                      if (searchInput.isEmpty) {
-                        notes = allNotes;
-                        filteredNotes = notes.where((element) => element['deleted'] == false).toList();
-                      } else {
-                        notes = allNotes
-                            .where((element) => utf8
-                                .decode(base64Url.decode(element['title']))
-                                .toString()
-                                .toLowerCase()
-                                .contains(searchInput.toLowerCase()))
-                            .toList();
-                        filteredNotes = notes.where((element) => element['deleted'] == false).toList();
-                      }
-                      if (_fav == true) {
-                        notes = allNotes.where((element) => element['isFav'] == 'true').toList();
-                        filteredNotes = notes.where((element) => element['deleted'] == false).toList();
-                      }
-                      if (_gridview == true) {
-                        if (filteredNotes.isNotEmpty) {
-                          return MyGridView(
-                              filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav, isBin: false);
-                        } else {
-                          return const Center(child: Text('No notes found'));
-                        }
-                      } else {
-                        if (filteredNotes.isNotEmpty) {
-                          return MyListView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
-                        } else {
-                          return const Center(child: Text('No notes found'));
-                        }
-                      }
-                    } else {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                  }),
-              if (banner != null && !kIsWeb)
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    height: 55,
-                    width: 325,
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 3,
-                          color: color.primary,
-                          offset: const Offset(0, 2),
-                        )
-                      ],
-                      border: Border.all(
-                        width: 0.5,
-                        color: color.primary,
-                      ),
-                      borderRadius: BorderRadius.circular(6),
-                      color: color.secondaryContainer.withOpacity(0.9),
-                    ),
-                    child: SizedBox(
-                      height: 50,
-                      width: 320,
-                      child: AdWidget(ad: banner!),
-                    ),
-                  ),
-                )
-            ],
-          ),
-        ),
+        body: StreamBuilder<List>(
+            stream: FireStore().readNotes(orderBy: _orderBy, descending: _descending),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text(snapshot.error.toString());
+              } else if (snapshot.hasData) {
+                final notesData = snapshot.data!;
+                List<Map<String, dynamic>> allNotes = notesData as List<Map<String, dynamic>>;
+                List<Map<String, dynamic>> filteredNotes = [];
+                if (searchInput.isEmpty) {
+                  notes = allNotes;
+                  filteredNotes = notes.where((element) => element['deleted'] == false).toList();
+                } else {
+                  notes = allNotes
+                      .where((element) => utf8
+                          .decode(base64Url.decode(element['title']))
+                          .toString()
+                          .toLowerCase()
+                          .contains(searchInput.toLowerCase()))
+                      .toList();
+                  filteredNotes = notes.where((element) => element['deleted'] == false).toList();
+                }
+                if (_fav == true) {
+                  notes = allNotes.where((element) => element['isFav'] == 'true').toList();
+                  filteredNotes = notes.where((element) => element['deleted'] == false).toList();
+                }
+                if (_gridview == true) {
+                  if (filteredNotes.isNotEmpty) {
+                    return MyGridView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav, isBin: false);
+                  } else {
+                    return const Center(child: Text('No notes found'));
+                  }
+                } else {
+                  if (filteredNotes.isNotEmpty) {
+                    return MyListView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
+                  } else {
+                    return const Center(child: Text('No notes found'));
+                  }
+                }
+              } else {
+                return const Center(child: CircularProgressIndicator());
+              }
+            }),
       ),
     );
   }
