@@ -13,7 +13,7 @@ class _RecycleBinState extends State<RecycleBin> {
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
-    List<Map<String, dynamic>> filteredNotes = notes.where((element) => element['deleted'] == true).toList();
+    List<Map<String, dynamic>> filteredNotes = allDocs.where((element) => element['deleted'] == true).toList();
     return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -26,6 +26,6 @@ class _RecycleBinState extends State<RecycleBin> {
           ),
           centerTitle: true,
         ),
-        body: MyGridView(filteredNotes: filteredNotes, searchInput: '', fav: false, isBin: true));
+        body: MyGridView(filteredDocs: filteredNotes, searchInput: '', fav: false, isBin: true));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:note_taking_firebase/services/google_signin.dart';
 import 'package:provider/provider.dart';
 
@@ -37,7 +38,7 @@ class WelcomeScreen extends StatelessWidget {
                           child: const Text('SignIn Anonymously'),
                           onPressed: () {
                             FirebaseAuth.instance.signInAnonymously();
-                            Navigator.pop(context);
+                            Get.back();
                           },
                         )
                       ],

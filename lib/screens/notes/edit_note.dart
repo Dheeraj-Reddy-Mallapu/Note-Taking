@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:get/get.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
+import 'package:note_taking_firebase/objects/note.dart';
 import 'package:note_taking_firebase/services/firestore.dart';
 import 'package:note_taking_firebase/widgets/my_snackbar.dart';
 import 'package:random_string_generator/random_string_generator.dart';
 
 class EditNote extends StatefulWidget {
   const EditNote({super.key, required this.data, required this.content});
-  final Map<String, dynamic> data;
+  final Note data;
   final q.QuillController content;
 
   @override
@@ -21,7 +22,7 @@ class EditNote extends StatefulWidget {
 class _EditNoteState extends State<EditNote> {
   final titleController = TextEditingController();
   q.QuillController contentController = q.QuillController.basic();
-  late String isFav;
+  late bool isFav;
   late bool fav;
   late Icon favIcon;
   final dB = FireStore();
@@ -29,11 +30,12 @@ class _EditNoteState extends State<EditNote> {
   int colourIndex = 0;
   late Icon selectedIcon;
   int dummy = 0;
+
   @override
   Widget build(BuildContext context) {
     if (dummy == 0) {
-      titleController.text = utf8.decode(base64Url.decode(widget.data['title']));
-      final decodeJson = jsonDecode(utf8.decode(base64Url.decode(widget.data['content'])));
+      titleController.text = utf8.decode(base64Url.decode(widget.data.title));
+      final decodeJson = jsonDecode(utf8.decode(base64Url.decode(widget.data.content)));
       contentController = q.QuillController(
         document: q.Document.fromJson(decodeJson),
         selection: const TextSelection.collapsed(offset: 0),
@@ -60,29 +62,25 @@ class _EditNoteState extends State<EditNote> {
       customColor.blue!,
       customColor.purple!,
     ];
+
     if (dummy == 0) {
-      colourIndex = widget.data['color'];
+      colourIndex = widget.data.color ?? 0;
     }
 
-    if (widget.data['isFav'] != null && dummy == 0) {
+    if (dummy == 0) {
       setState(() {
-        isFav = widget.data['isFav'];
-        if (widget.data['isFav'] == 'true') {
+        isFav = widget.data.isFav ?? false;
+        if (widget.data.isFav == true) {
           fav = true;
           favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
         }
-        if (widget.data['isFav'] == 'false') {
+        if (widget.data.isFav == false) {
           fav = false;
           favIcon = const Icon(Icons.favorite_border);
         }
       });
-    } else if (widget.data['isFav'] == null && dummy == 0) {
-      setState(() {
-        isFav = 'false';
-        fav = false;
-        favIcon = const Icon(Icons.favorite_border);
-      });
     }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: colours[colourIndex],
@@ -102,7 +100,7 @@ class _EditNoteState extends State<EditNote> {
                 String encodedC = base64Url.encode(utf8.encode(jsonContent));
                 try {
                   await FireStore()
-                      .updateNote(id: widget.data['id'], title: encodedT, content: encodedC, color: colourIndex)
+                      .updateNote(id: widget.data.id, title: encodedT, content: encodedC, color: colourIndex)
                       .whenComplete(() => mySnackBar(context, 'Hurray!', 'Successfully SAVED', ContentType.success));
                 } catch (e) {
                   mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
@@ -123,7 +121,7 @@ class _EditNoteState extends State<EditNote> {
                     ),
                     onTap: () {
                       try {
-                        FireStore().createBinNote(id: widget.data['id'], deleted: true).whenComplete(() => Get.back());
+                        FireStore().createBinNote(id: widget.data.id, deleted: true).whenComplete(() => Get.back());
                         mySnackBar(context, 'Hey!', 'Moved to Recycle Bin', ContentType.success);
                       } catch (e) {
                         mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
@@ -139,17 +137,16 @@ class _EditNoteState extends State<EditNote> {
                           children: [
                             ListTile(
                               title: const Text("Created at:"),
-                              subtitle: Text(widget.data['createdAt']),
+                              subtitle: Text(widget.data.createdAt),
                             ),
                             ListTile(
                               title: const Text("Last edited:"),
-                              subtitle: Text(widget.data['modifiedAt']),
+                              subtitle: Text(widget.data.modifiedAt ?? ''),
                             ),
-                            if (widget.data['sentBy'] != null && widget.data['sentBy'] != '')
-                              ListTile(
-                                title: const Text("Recieved from:"),
-                                subtitle: Text(widget.data['sentBy']),
-                              ),
+                            ListTile(
+                              title: const Text("Recieved from:"),
+                              subtitle: Text(widget.data.sentBy ?? ''),
+                            ),
                           ],
                         );
                       },
@@ -202,17 +199,14 @@ class _EditNoteState extends State<EditNote> {
                                                             dB
                                                                 .createNote(
                                                                     uid: frndData['frndUid'],
-                                                                    title: widget.data['title'],
-                                                                    content: widget.data['content'],
+                                                                    title: widget.data.title,
+                                                                    content: widget.data.content,
                                                                     id: id,
-                                                                    deleted: widget.data['deleted'],
-                                                                    color: widget.data['color'],
-                                                                    sentBy: user.displayName!)
-                                                                .whenComplete(() => db
-                                                                        .collection(user.uid)
-                                                                        .doc(widget.data['id'])
-                                                                        .update({
-                                                                      'sentToName': frndData['frndName'],
+                                                                    deleted: widget.data.deleted ?? false,
+                                                                    color: widget.data.color ?? 0,
+                                                                    sentBy: user.displayName ?? 'Anonymous User')
+                                                                .whenComplete(() =>
+                                                                    db.collection(user.uid).doc(widget.data.id).update({
                                                                       'sentToID': frndData['frndUid'],
                                                                     }));
                                                             await db
@@ -314,22 +308,22 @@ class _EditNoteState extends State<EditNote> {
                 ),
                 IconButton(
                   onPressed: () {
-                    if (isFav == 'false') {
+                    if (isFav == false) {
                       setState(() {
-                        isFav = 'true';
+                        isFav = true;
                         favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
                         dummy++;
                       });
                       mySnackBar(context, 'Hurray!', 'Successfully added to Favorites', ContentType.success);
-                    } else if (isFav == 'true') {
+                    } else if (isFav == true) {
                       setState(() {
-                        isFav = 'false';
+                        isFav = true;
                         favIcon = const Icon(Icons.favorite_border);
                         dummy++;
                       });
                       mySnackBar(context, 'Hey!', 'Removed from Favorites', ContentType.success);
                     }
-                    db.collection(user.uid).doc(widget.data['id']).update({'isFav': isFav});
+                    db.collection(user.uid).doc(widget.data.id).update({'isFav': isFav});
                   },
                   icon: favIcon,
                 ),

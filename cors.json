@@ -1,0 +1,11 @@
+[
+  {
+    "origin": [
+      "http://localhost:5000",
+      "https://note-taking-de2af.web.app"
+    ],
+    "method": ["GET", "POST", "DELETE"],
+    "responseHeader": ["Content-Type"],
+    "maxAgeSeconds": 3600
+  }
+]

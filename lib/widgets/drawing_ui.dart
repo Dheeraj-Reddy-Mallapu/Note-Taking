@@ -2,20 +2,17 @@ import 'dart:convert';
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:note_taking_firebase/custom_color.g.dart';
-import 'package:note_taking_firebase/objects/note.dart';
+import 'package:note_taking_firebase/objects/drawing.dart';
 
-class NotesUI extends StatelessWidget {
-  const NotesUI({
+class DrawingUI extends StatelessWidget {
+  const DrawingUI({
     super.key,
     required this.data,
-    required this.content,
     required this.openNote,
     required this.index,
   });
-  final Note data;
-  final quill.QuillController content;
+  final Drawing data;
   final Widget openNote;
   final int index;
 
@@ -45,7 +42,7 @@ class NotesUI extends StatelessWidget {
       customColor.blue!,
       customColor.purple!,
     ];
-    int colourIndex = data.color ?? 0;
+    int colourIndex = data.color;
     double listHeight = 200;
     if (kIsWeb && size > 880) {
       listHeight = 300;
@@ -102,18 +99,8 @@ class NotesUI extends StatelessWidget {
                   color: primaryColours[colourIndex],
                   thickness: 0.5,
                 ),
-              Expanded(
-                child: quill.QuillEditor(
-                  padding: const EdgeInsets.all(2.0),
-                  focusNode: FocusNode(),
-                  scrollController: ScrollController(),
-                  scrollable: true,
-                  autoFocus: false,
-                  expands: true,
-                  readOnly: true,
-                  enableInteractiveSelection: false,
-                  controller: content,
-                ),
+              const Expanded(
+                child: Center(child: Text('This is a Drawing\nPreview is coming soon')),
               ),
             ]),
           ),

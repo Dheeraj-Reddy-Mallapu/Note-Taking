@@ -1,66 +1,87 @@
-import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:note_taking_firebase/screens/drawings/drawings.dart';
-import 'package:note_taking_firebase/screens/notes/notes.dart';
-import 'package:note_taking_firebase/widgets/banner_container.dart';
+// import 'package:flutter/foundation.dart';
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+// import 'package:note_taking_firebase/screens/drawings/drawing_pad.dart';
+// import 'package:note_taking_firebase/screens/drawings/drawings.dart';
+// import 'package:note_taking_firebase/screens/notes/notes.dart';
+// import 'package:note_taking_firebase/widgets/banner_container.dart';
+// import 'package:quick_actions/quick_actions.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key, required this.pageIndex});
-  final int? pageIndex;
+// import 'notes/new_note.dart';
 
-  @override
-  State<MainScreen> createState() => _MainScreenState();
-}
+// class MainScreen extends StatefulWidget {
+//   const MainScreen({super.key});
 
-class _MainScreenState extends State<MainScreen> {
-  int selectedIndex = 0;
+//   @override
+//   State<MainScreen> createState() => _MainScreenState();
+// }
 
-  List<Widget> pages = [const Notes(), const Drawings()];
+// class _MainScreenState extends State<MainScreen> {
+//   int selectedIndex = 0;
 
-  @override
-  void initState() {
-    if (widget.pageIndex != null) {
-      selectedIndex = widget.pageIndex!;
-    }
-    super.initState();
-  }
+//   List<Widget> pages = [const Notes(), const Drawings()];
 
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme;
+//   // for quick actions
+//   final quickActions = const QuickActions();
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          pages.elementAt(selectedIndex),
-          const Align(
-            alignment: Alignment.bottomCenter,
-            child: BannerContainer(),
-          )
-        ],
-      ),
-      bottomNavigationBar: GNav(
-        tabs: const [
-          GButton(
-            icon: Icons.sticky_note_2_outlined,
-            text: 'Notes',
-          ),
-          GButton(
-            icon: Icons.draw_outlined,
-            text: 'Drawings',
-          ),
-        ],
-        selectedIndex: selectedIndex,
-        onTabChange: (value) => setState(() => selectedIndex = value),
-        tabMargin: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-        padding: const EdgeInsets.all(8),
-        gap: 8,
-        backgroundColor: color.secondaryContainer,
-        activeColor: color.surface,
-        tabBorderRadius: 30,
-        tabBackgroundColor: color.primary,
-        curve: Curves.easeOutExpo,
-      ),
-    );
-  }
-}
+//   @override
+//   void initState() {
+//     //for quick actions
+//     if (!kIsWeb) {
+//       quickActions.setShortcutItems([
+//         const ShortcutItem(type: 'note', localizedTitle: 'New Note', icon: 'add'),
+//         const ShortcutItem(type: 'drawing', localizedTitle: 'New Drawing', icon: 'add'),
+//       ]);
+
+//       quickActions.initialize((type) {
+//         if (type == 'note') {
+//           Get.to(() => const NewNote());
+//         } else if (type == 'drawing') {
+//           Get.to(() => const DrawingPad());
+//         }
+//       });
+//     }
+//     super.initState();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final color = Theme.of(context).colorScheme;
+
+//     return Scaffold(
+//       body: Stack(
+//         children: [
+//           IndexedStack(index: selectedIndex, children: pages),
+//           if (!kIsWeb)
+//             const Align(
+//               alignment: Alignment.bottomCenter,
+//               child: BannerContainer(),
+//             )
+//         ],
+//       ),
+//       bottomNavigationBar: NavigationBarTheme(
+//         data: NavigationBarThemeData(
+//           height: 50,
+//           indicatorColor: color.primaryContainer,
+//         ),
+//         child: NavigationBar(
+//           selectedIndex: selectedIndex,
+//           // labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+//           destinations: const [
+//             NavigationDestination(
+//               icon: Icon(Icons.sticky_note_2_outlined),
+//               selectedIcon: Icon(Icons.sticky_note_2),
+//               label: 'Notes',
+//             ),
+//             NavigationDestination(
+//               icon: Icon(Icons.draw_outlined),
+//               selectedIcon: Icon(Icons.draw),
+//               label: 'Drawings',
+//             ),
+//           ],
+//           onDestinationSelected: (value) => setState(() => selectedIndex = value),
+//         ),
+//       ),
+//     );
+//   }
+// }

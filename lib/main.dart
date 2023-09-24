@@ -7,6 +7,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:note_taking_firebase/firebase_options.dart';
+import 'package:note_taking_firebase/screens/drawings/drawing_pad.dart';
 import 'package:note_taking_firebase/screens/friends_list.dart';
 import 'package:note_taking_firebase/screens/guide_screen.dart';
 import 'package:note_taking_firebase/screens/notes/new_note.dart';
@@ -25,8 +26,8 @@ Future main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.debug,
-    webRecaptchaSiteKey: recaptchaV3SiteKey,
+    androidProvider: kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
+    webProvider: ReCaptchaV3Provider(recaptchaV3SiteKey),
   );
 
   runApp(const MyApp());
@@ -72,6 +73,7 @@ class MyApp extends StatelessWidget {
               GetPage(name: '/Guide', page: () => const GuideScreen()),
               GetPage(name: '/RecycleBin', page: () => const RecycleBin()),
               GetPage(name: '/NewNote', page: () => const NewNote()),
+              GetPage(name: '/DrawingPad', page: () => const DrawingPad()),
               GetPage(name: '/FriendsList', page: () => const FriendsList()),
               //GetPage(name: '/ShareScreen', page: () => const ShareScreen()),
             ],

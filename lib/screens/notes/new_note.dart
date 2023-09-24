@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
 import 'package:note_taking_firebase/services/firestore.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
@@ -58,13 +59,62 @@ class _NewNoteState extends State<NewNote> {
       savedContent = jsonEncode(contentController.document.toDelta().toJson());
     }
 
+    saveNote() async {
+      final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
+      String encodedT = base64Url.encode(utf8.encode(titleController.text));
+      String encodedC = base64Url.encode(utf8.encode(jsonContent));
+
+      FireStore().createNote(
+          uid: user.uid, id: id, title: encodedT, content: encodedC, sentBy: '', deleted: false, color: colourIndex);
+      await db.collection(user.uid).doc(id).get().then((value) {
+        if (value.exists) {
+          mySnackBar(context, 'Hurray!', 'Successfully SAVED', ContentType.success);
+
+          savedTitle = titleController.text;
+          savedContent = jsonContent;
+          setState(() {});
+        } else {
+          mySnackBar(context, 'Oh Snap!', 'Something went wrong. Please try again', ContentType.failure);
+        }
+      });
+    }
+
     return WillPopScope(
       onWillPop: () async {
         final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
-        if (savedContent == jsonContent && savedTitle == titleController.text) {
-          return true;
+        if (savedContent != jsonContent || savedTitle != titleController.text) {
+          Get.defaultDialog(
+            title: 'Save Changes',
+            content: const Text('Save: save changes\nDiscard: ignore changes\nCancel: do nothing'),
+            actions: [
+              TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+              ElevatedButton(
+                onPressed: () {
+                  contentController.clear();
+                  titleController.clear();
+
+                  Get.back();
+                  Get.back();
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStatePropertyAll(color.errorContainer),
+                  foregroundColor: MaterialStatePropertyAll(color.error),
+                ),
+                child: const Text('Discard'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  await saveNote();
+
+                  Get.back();
+                  Get.back();
+                },
+                child: const Text('Save'),
+              ),
+            ],
+          );
         }
-        return false;
+        return true;
       },
       child: Scaffold(
         appBar: AppBar(
@@ -79,35 +129,7 @@ class _NewNoteState extends State<NewNote> {
           actions: [
             ElevatedButton(
                 style: ButtonStyle(foregroundColor: MaterialStatePropertyAll(primaryColours[colourIndex])),
-                onPressed: () async {
-                  final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
-                  String encodedT = base64Url.encode(utf8.encode(titleController.text));
-                  String encodedC = base64Url.encode(utf8.encode(jsonContent));
-
-                  try {
-                    FireStore().createNote(
-                        uid: user.uid,
-                        id: id,
-                        title: encodedT,
-                        content: encodedC,
-                        sentBy: '',
-                        deleted: false,
-                        color: colourIndex);
-                    await db.collection(user.uid).doc(id).get().then((value) {
-                      if (value.exists) {
-                        mySnackBar(context, 'Hurray!', 'Successfully SAVED', ContentType.success);
-
-                        savedTitle = titleController.text;
-                        savedContent = jsonContent;
-                        setState(() {});
-                      } else {
-                        mySnackBar(context, 'Oh Snap!', 'Something went wrong. Please try again', ContentType.failure);
-                      }
-                    });
-                  } catch (e) {
-                    mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
-                  }
-                },
+                onPressed: () async => await saveNote(),
                 child: const Text('SAVE'))
           ],
         ),

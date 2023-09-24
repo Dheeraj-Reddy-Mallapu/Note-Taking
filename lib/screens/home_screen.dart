@@ -3,31 +3,26 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:note_taking_firebase/screens/drawings/new_drawing.dart';
+import 'package:note_taking_firebase/screens/drawings/drawing_pad.dart';
 import 'package:note_taking_firebase/screens/notes/new_note.dart';
 import 'package:note_taking_firebase/shares_preferences.dart';
+import 'package:note_taking_firebase/widgets/floating_btn.dart';
+import 'package:note_taking_firebase/widgets/my_drawer.dart';
 import 'package:note_taking_firebase/widgets/my_gridview.dart';
-import 'package:note_taking_firebase/widgets/my_list_tile.dart';
 import 'package:note_taking_firebase/widgets/my_listview.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:share_plus/share_plus.dart';
-import '../../services/firestore.dart';
-import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:quick_actions/quick_actions.dart';
-import 'package:animations/animations.dart';
+import '../services/firestore.dart';
+import 'package:flutter_quill/flutter_quill.dart' as q;
 
-class Notes extends StatefulWidget {
-  const Notes({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<Notes> createState() => _NotesState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _NotesState extends State<Notes> {
+class _HomeScreenState extends State<HomeScreen> {
   final user = FirebaseAuth.instance.currentUser!;
-  String displayName = '';
-  String photoURL = '';
-  String displayEmail = '';
 
   final titleController = TextEditingController();
   q.QuillController contentController = q.QuillController.basic();
@@ -46,9 +41,6 @@ class _NotesState extends State<Notes> {
   final searchController = TextEditingController();
   String searchInput = '';
 
-  // for quick actions
-  final quickActions = const QuickActions();
-
   // initialize Shared Preferences
   initSharedPrefs() async {
     _orderBy = await getOrderBy();
@@ -56,6 +48,9 @@ class _NotesState extends State<Notes> {
     _fav = await getFav();
     _gridview = await getGridview();
   }
+
+  // for quick actions
+  final quickActions = const QuickActions();
 
   @override
   void initState() {
@@ -67,10 +62,14 @@ class _NotesState extends State<Notes> {
     if (!kIsWeb) {
       quickActions.setShortcutItems([
         const ShortcutItem(type: 'note', localizedTitle: 'New Note', icon: 'add'),
+        const ShortcutItem(type: 'drawing', localizedTitle: 'New Drawing', icon: 'add'),
       ]);
+
       quickActions.initialize((type) {
         if (type == 'note') {
-          Get.to(const NewNote());
+          Get.to(() => const NewNote());
+        } else if (type == 'drawing') {
+          Get.to(() => const DrawingPad());
         }
       });
     }
@@ -79,7 +78,6 @@ class _NotesState extends State<Notes> {
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
-
     double size = MediaQuery.of(context).size.width;
 
     if (_gridview == true) {
@@ -103,13 +101,6 @@ class _NotesState extends State<Notes> {
       });
     }
 
-    if (user.isAnonymous) {
-      displayName = 'Hello User!';
-    } else {
-      displayName = user.displayName!;
-      photoURL = user.photoURL!;
-      displayEmail = user.email!;
-    }
     if (_fav == true) {
       setState(() {
         favIcon = const Icon(
@@ -132,9 +123,7 @@ class _NotesState extends State<Notes> {
           title: TextField(
             focusNode: FocusNode(),
             controller: searchController,
-            onChanged: (value) => setState(() {
-              searchInput = value;
-            }),
+            onChanged: (value) => setState(() => searchInput = value),
             decoration: const InputDecoration(
               prefixIcon: Icon(Icons.search),
               hintText: 'Search...',
@@ -180,7 +169,7 @@ class _NotesState extends State<Notes> {
                                         setDescending(_descending);
                                         setOrderBy(_orderBy);
                                       });
-                                      Navigator.pop(context);
+                                      Get.back();
                                     },
                                     child: const Text('Asc ⬆')),
                                 TextButton(
@@ -191,7 +180,7 @@ class _NotesState extends State<Notes> {
                                         setDescending(_descending);
                                         setOrderBy(_orderBy);
                                       });
-                                      Navigator.pop(context);
+                                      Get.back();
                                     },
                                     child: const Text('Desc ⬇'))
                               ],
@@ -212,7 +201,7 @@ class _NotesState extends State<Notes> {
                                         setDescending(_descending);
                                         setOrderBy(_orderBy);
                                       });
-                                      Navigator.pop(context);
+                                      Get.back();
                                     },
                                     child: const Text('Asc. ⬆')),
                                 TextButton(
@@ -223,7 +212,7 @@ class _NotesState extends State<Notes> {
                                         setDescending(_descending);
                                         setOrderBy(_orderBy);
                                       });
-                                      Navigator.pop(context);
+                                      Get.back();
                                     },
                                     child: const Text('Desc. ⬇')),
                               ],
@@ -258,12 +247,6 @@ class _NotesState extends State<Notes> {
                         children: [Text(viewToolTip, style: const TextStyle(fontSize: 16)), viewIcon],
                       ),
                     ),
-                  PopupMenuItem(
-                    onTap: () {
-                      Get.to(() => const NewDrawing());
-                    },
-                    child: const Text('drawing'),
-                  ),
                 ];
               }),
               icon: const Icon(Icons.more_vert),
@@ -271,142 +254,56 @@ class _NotesState extends State<Notes> {
             ),
           ],
         ),
-        /*bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notes_rounded),
-              label: 'Notes',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.image),
-              label: 'Drawings',
-            ),
-          ],
-        ),*/
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButton: Padding(
-          padding: const EdgeInsets.only(bottom: 50.0),
-          child: OpenContainer(
-            openBuilder: (context, _) => const NewNote(),
-            closedShape: const CircleBorder(),
-            closedBuilder: (context, VoidCallback openContainer) => Container(
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(shape: BoxShape.circle, color: color.secondaryContainer),
-              child: Icon(Icons.add, color: color.primary),
-            ),
-          ),
-        ),
-        drawer: Drawer(
-          child: ListView(children: [
-            UserAccountsDrawerHeader(
-              accountName: Text(displayName, style: TextStyle(color: color.surface)),
-              accountEmail: Text(displayEmail, style: TextStyle(color: color.surface)),
-              currentAccountPicture: CircleAvatar(backgroundImage: NetworkImage(photoURL)),
-            ),
-            Center(
-              child: TextButton(
-                  onPressed: () {
-                    Get.defaultDialog(
-                        title: 'QR Code',
-                        titleStyle: TextStyle(color: color.primary),
-                        content: Column(
-                          children: [
-                            GestureDetector(
-                              child: QrImageView(data: user.uid),
-                              onTap: () => Share.share(user.uid),
-                            ),
-                            Center(
-                              child: Text(
-                                'Scan or tap the QR code to share',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(fontWeight: FontWeight.bold, color: color.primary),
-                              ),
-                            ),
-                          ],
-                        ),
-                        actions: [ElevatedButton(onPressed: () => Get.back(), child: const Text('Done'))]);
-                  },
-                  child: const Text('My Unique code')),
-            ),
-            Divider(
-              color: color.primary,
-              thickness: 0.5,
-            ),
-            const MyListTile(
-              toScreen: '/FriendsList',
-              toScreenIcon: Icon(Icons.people_rounded),
-              toScreenTitle: 'Friends',
-            ),
-            const MyListTile(
-              toScreen: '/RecycleBin',
-              toScreenIcon: Icon(Icons.recycling_rounded),
-              toScreenTitle: 'Recycle Bin',
-            ),
-            const MyListTile(
-              toScreen: '/Guide',
-              toScreenIcon: Icon(Icons.help_outline_rounded),
-              toScreenTitle: 'Guide',
-            ),
-            ListTile(
-                leading: const Icon(Icons.info_outline_rounded),
-                title: const Text('About'),
-                onTap: () {
-                  Navigator.pop(context);
-                  showAboutDialog(
-                      context: context,
-                      applicationName: 'Note Taking',
-                      applicationIcon: Image.asset('assets/notes.png', height: 40),
-                      children: [
-                        const ListTile(
-                          title: Text('Open Source Project'),
-                        ),
-                        const ListTile(
-                          title: SelectableText('https://github.com/Dheeraj-Reddy-Mallapu'),
-                        ),
-                      ]);
-                }),
-            Divider(
-              color: color.primary,
-              thickness: 0.5,
-            ),
-          ]),
-        ),
+        floatingActionButton: const FloatingBtn(),
+        drawer: const MyDrawer(),
         body: StreamBuilder<List>(
-            stream: FireStore().readNotes(orderBy: _orderBy, descending: _descending),
+            stream: FireStore().getDocs(orderBy: _orderBy, descending: _descending),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 return Text(snapshot.error.toString());
               } else if (snapshot.hasData) {
-                final notesData = snapshot.data!;
-                List<Map<String, dynamic>> allNotes = notesData as List<Map<String, dynamic>>;
-                List<Map<String, dynamic>> filteredNotes = [];
+                final docsData = snapshot.data!;
+                allDocs = docsData as List<Map<String, dynamic>>;
+                List<Map<String, dynamic>> filteredDocs = [];
+
                 if (searchInput.isEmpty) {
-                  notes = allNotes;
-                  filteredNotes = notes.where((element) => element['deleted'] == false).toList();
+                  filteredDocs = allDocs.where((element) => element['deleted'] == false).toList();
                 } else {
-                  notes = allNotes
+                  final searchedDocs = allDocs
                       .where((element) => utf8
                           .decode(base64Url.decode(element['title']))
                           .toString()
                           .toLowerCase()
                           .contains(searchInput.toLowerCase()))
                       .toList();
-                  filteredNotes = notes.where((element) => element['deleted'] == false).toList();
+                  filteredDocs = searchedDocs.where((element) => element['deleted'] == false).toList();
                 }
                 if (_fav == true) {
-                  notes = allNotes.where((element) => element['isFav'] == 'true').toList();
-                  filteredNotes = notes.where((element) => element['deleted'] == false).toList();
+                  final favDocs = allDocs
+                      .where((element) =>
+                          element['isFav'] is bool ? element['isFav'] : bool.parse(element['isFav'] ?? 'false') == true)
+                      .toList();
+                  filteredDocs = favDocs.where((element) => element['deleted'] == false).toList();
                 }
+
+                // print(filteredDocs);
+
                 if (_gridview == true) {
-                  if (filteredNotes.isNotEmpty) {
-                    return MyGridView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav, isBin: false);
+                  if (filteredDocs.isNotEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: MyGridView(filteredDocs: filteredDocs, searchInput: searchInput, fav: _fav, isBin: false),
+                    );
                   } else {
                     return const Center(child: Text('No notes found'));
                   }
                 } else {
-                  if (filteredNotes.isNotEmpty) {
-                    return MyListView(filteredNotes: filteredNotes, searchInput: searchInput, fav: _fav);
+                  if (filteredDocs.isNotEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: MyListView(filteredDocs: filteredDocs, searchInput: searchInput, fav: _fav),
+                    );
                   } else {
                     return const Center(child: Text('No notes found'));
                   }
