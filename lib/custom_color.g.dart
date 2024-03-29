@@ -6,6 +6,8 @@ const greenishblue = Color(0xFF00696C);
 const yellowishgreen = Color(0xFF6B8010);
 const purple = Color(0xFF694EA7);
 const blue = Color(0xFF0060A8);
+const red = Color(0xFFB71F27);
+const green = Color(0xFF005C2F);
 
 CustomColors lightCustomColors = const CustomColors(
   sourceYellowishbrown: Color(0xFF745B00),
@@ -16,18 +18,18 @@ CustomColors lightCustomColors = const CustomColors(
   sourcePinkishred: Color(0xFF9A3E61),
   pinkishred: Color(0xFF9A3E61),
   onPinkishred: Color(0xFFFFFFFF),
-  pinkishredContainer: Color.fromARGB(255, 255, 217, 236),
+  pinkishredContainer: Color(0xFFFFD9E2),
   onPinkishredContainer: Color(0xFF3E001D),
   sourceGreenishblue: Color(0xFF00696C),
   greenishblue: Color(0xFF00696C),
   onGreenishblue: Color(0xFFFFFFFF),
-  greenishblueContainer: Color(0xFF96F0FF),
-  onGreenishblueContainer: Color(0xFF001F24),
+  greenishblueContainer: Color(0xFF6FF6FB),
+  onGreenishblueContainer: Color(0xFF002021),
   sourceYellowishgreen: Color(0xFF6B8010),
   yellowishgreen: Color(0xFF536500),
   onYellowishgreen: Color(0xFFFFFFFF),
-  yellowishgreenContainer: Color(0xFFDBEC79),
-  onYellowishgreenContainer: Color(0xFF191E00),
+  yellowishgreenContainer: Color(0xFFD4EE76),
+  onYellowishgreenContainer: Color(0xFF171E00),
   sourcePurple: Color(0xFF694EA7),
   purple: Color(0xFF694EA7),
   onPurple: Color(0xFFFFFFFF),
@@ -36,8 +38,18 @@ CustomColors lightCustomColors = const CustomColors(
   sourceBlue: Color(0xFF0060A8),
   blue: Color(0xFF0160A8),
   onBlue: Color(0xFFFFFFFF),
-  blueContainer: Color.fromARGB(255, 211, 226, 255),
+  blueContainer: Color(0xFFD3E4FF),
   onBlueContainer: Color(0xFF001C38),
+  sourceRed: Color(0xFFB71F27),
+  red: Color(0xFFB71F27),
+  onRed: Color(0xFFFFFFFF),
+  redContainer: Color(0xFFFFDAD7),
+  onRedContainer: Color(0xFF410004),
+  sourceGreen: Color(0xFF005C2F),
+  green: Color(0xFF006D39),
+  onGreen: Color(0xFFFFFFFF),
+  greenContainer: Color(0xFF9AF6B3),
+  onGreenContainer: Color(0xFF00210D),
 );
 
 CustomColors darkCustomColors = const CustomColors(
@@ -51,16 +63,16 @@ CustomColors darkCustomColors = const CustomColors(
   onPinkishred: Color(0xFF5F0E33),
   pinkishredContainer: Color(0xFF7D274A),
   onPinkishredContainer: Color(0xFFFFD9E2),
-  sourceGreenishblue: Color(0xFF005B65),
-  greenishblue: Color(0xFF4FD8EB),
-  onGreenishblue: Color(0xFF00363D),
-  greenishblueContainer: Color(0xFF004F57),
-  onGreenishblueContainer: Color(0xFF96F0FF),
-  sourceYellowishgreen: Color(0xFF586400),
-  yellowishgreen: Color(0xFFBFCF60),
-  onYellowishgreen: Color(0xFF2D3400),
-  yellowishgreenContainer: Color(0xFF424B00),
-  onYellowishgreenContainer: Color(0xFFDBEC79),
+  sourceGreenishblue: Color(0xFF00696C),
+  greenishblue: Color(0xFF4CD9DE),
+  onGreenishblue: Color(0xFF003738),
+  greenishblueContainer: Color(0xFF004F52),
+  onGreenishblueContainer: Color(0xFF6FF6FB),
+  sourceYellowishgreen: Color(0xFF6B8010),
+  yellowishgreen: Color(0xFFB9D15D),
+  onYellowishgreen: Color(0xFF2A3400),
+  yellowishgreenContainer: Color(0xFF3E4C00),
+  onYellowishgreenContainer: Color(0xFFD4EE76),
   sourcePurple: Color(0xFF694EA7),
   purple: Color(0xFFD1BCFF),
   onPurple: Color(0xFF3A1B75),
@@ -71,6 +83,16 @@ CustomColors darkCustomColors = const CustomColors(
   onBlue: Color(0xFF00315B),
   blueContainer: Color(0xFF004881),
   onBlueContainer: Color(0xFFD3E4FF),
+  sourceRed: Color(0xFFB71F27),
+  red: Color(0xFFFFB3AE),
+  onRed: Color(0xFF68000B),
+  redContainer: Color(0xFF930014),
+  onRedContainer: Color(0xFFFFDAD7),
+  sourceGreen: Color(0xFF005C2F),
+  green: Color(0xFF7FDA99),
+  onGreen: Color(0xFF00391B),
+  greenContainer: Color(0xFF005229),
+  onGreenContainer: Color(0xFF9AF6B3),
 );
 
 /// Defines a set of custom colors, each comprised of 4 complementary tones.
@@ -110,6 +132,16 @@ class CustomColors extends ThemeExtension<CustomColors> {
     required this.onBlue,
     required this.blueContainer,
     required this.onBlueContainer,
+    required this.sourceRed,
+    required this.red,
+    required this.onRed,
+    required this.redContainer,
+    required this.onRedContainer,
+    required this.sourceGreen,
+    required this.green,
+    required this.onGreen,
+    required this.greenContainer,
+    required this.onGreenContainer,
   });
 
   final Color? sourceYellowishbrown;
@@ -142,6 +174,16 @@ class CustomColors extends ThemeExtension<CustomColors> {
   final Color? onBlue;
   final Color? blueContainer;
   final Color? onBlueContainer;
+  final Color? sourceRed;
+  final Color? red;
+  final Color? onRed;
+  final Color? redContainer;
+  final Color? onRedContainer;
+  final Color? sourceGreen;
+  final Color? green;
+  final Color? onGreen;
+  final Color? greenContainer;
+  final Color? onGreenContainer;
 
   @override
   CustomColors copyWith({
@@ -175,6 +217,16 @@ class CustomColors extends ThemeExtension<CustomColors> {
     Color? onBlue,
     Color? blueContainer,
     Color? onBlueContainer,
+    Color? sourceRed,
+    Color? red,
+    Color? onRed,
+    Color? redContainer,
+    Color? onRedContainer,
+    Color? sourceGreen,
+    Color? green,
+    Color? onGreen,
+    Color? greenContainer,
+    Color? onGreenContainer,
   }) {
     return CustomColors(
       sourceYellowishbrown: sourceYellowishbrown ?? this.sourceYellowishbrown,
@@ -207,6 +259,16 @@ class CustomColors extends ThemeExtension<CustomColors> {
       onBlue: onBlue ?? this.onBlue,
       blueContainer: blueContainer ?? this.blueContainer,
       onBlueContainer: onBlueContainer ?? this.onBlueContainer,
+      sourceRed: sourceRed ?? this.sourceRed,
+      red: red ?? this.red,
+      onRed: onRed ?? this.onRed,
+      redContainer: redContainer ?? this.redContainer,
+      onRedContainer: onRedContainer ?? this.onRedContainer,
+      sourceGreen: sourceGreen ?? this.sourceGreen,
+      green: green ?? this.green,
+      onGreen: onGreen ?? this.onGreen,
+      greenContainer: greenContainer ?? this.greenContainer,
+      onGreenContainer: onGreenContainer ?? this.onGreenContainer,
     );
   }
 
@@ -246,6 +308,16 @@ class CustomColors extends ThemeExtension<CustomColors> {
       onBlue: Color.lerp(onBlue, other.onBlue, t),
       blueContainer: Color.lerp(blueContainer, other.blueContainer, t),
       onBlueContainer: Color.lerp(onBlueContainer, other.onBlueContainer, t),
+      sourceRed: Color.lerp(sourceRed, other.sourceRed, t),
+      red: Color.lerp(red, other.red, t),
+      onRed: Color.lerp(onRed, other.onRed, t),
+      redContainer: Color.lerp(redContainer, other.redContainer, t),
+      onRedContainer: Color.lerp(onRedContainer, other.onRedContainer, t),
+      sourceGreen: Color.lerp(sourceGreen, other.sourceGreen, t),
+      green: Color.lerp(green, other.green, t),
+      onGreen: Color.lerp(onGreen, other.onGreen, t),
+      greenContainer: Color.lerp(greenContainer, other.greenContainer, t),
+      onGreenContainer: Color.lerp(onGreenContainer, other.onGreenContainer, t),
     );
   }
 

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:note_taking_firebase/objects/drawing.dart';
+import 'package:note_taking_firebase/objects/drawing_note.dart';
 
 final db = FirebaseFirestore.instance;
 final user = FirebaseAuth.instance.currentUser!;
@@ -36,31 +36,34 @@ class FireStore {
     await doc.set(json);
   }
 
-  Future saveDrawingDetails(
-      {required bool isEditMode,
-      required String uid,
-      required String id,
-      required String title,
-      required String url,
-      required int canvaColor}) async {
+  Future saveDrawingDetails({
+    required bool isEditMode,
+    required String uid,
+    required String id,
+    required String title,
+    required String url,
+    required bool isFav,
+    required int color,
+    required int canvaColor,
+  }) async {
     final doc = db.collection(uid).doc(id);
 
     final time = DateTime.now().toLocal().toString().substring(0, 19);
 
-    Map<String, dynamic> json = Drawing(
+    Map<String, dynamic> json = DrawingNote(
       id: id,
       type: 'drawing',
       title: title,
       url: url,
-      sentBy: '',
+      receivedFrom: '',
       sentTo: [],
       deleted: false,
-      isFav: false,
+      isFav: isFav,
       createdAt: time,
       modifiedAt: time,
       deletedAt: '',
       restoredAt: '',
-      color: 0,
+      color: color,
       canvaColor: canvaColor,
     ).toMap();
 

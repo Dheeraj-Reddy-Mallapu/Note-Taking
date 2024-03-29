@@ -1,24 +1,24 @@
+import 'dart:convert';
+
 class Note {
   String id;
-  String? type;
+  String type;
   String title;
-  String content;
-  String? sentBy;
-  List<dynamic>? sentTo;
-  bool? deleted;
-  bool? isFav;
+  String receivedFrom;
+  List<String> sentTo;
+  bool deleted;
+  bool isFav;
   String createdAt;
-  String? modifiedAt;
-  String? deletedAt;
-  String? restoredAt;
-  int? color;
+  String modifiedAt;
+  String deletedAt;
+  String restoredAt;
+  int color;
 
   Note({
     required this.id,
     required this.type,
     required this.title,
-    required this.content,
-    required this.sentBy,
+    required this.receivedFrom,
     required this.sentTo,
     required this.deleted,
     required this.isFav,
@@ -29,37 +29,48 @@ class Note {
     required this.color,
   });
 
-  factory Note.fromMap(Map<String, dynamic> note) => Note(
-        id: note["id"],
-        type: note["type"],
-        title: note["title"],
-        content: note["content"],
-        sentBy: note["sentBy"],
-        sentTo: List<dynamic>.from(note["sentTo"] ?? [].map((x) => x)),
-        deleted: note["deleted"],
-        isFav: note["isFav"] is bool ? note["isFav"] : bool.parse(note["isFav"] ?? 'false'),
-        createdAt: note["createdAt"],
-        modifiedAt: note["modifiedAt"],
-        deletedAt: note["deletedAt"],
-        restoredAt: note["restoredAt"],
-        color: note["color"],
+  Note copyWith({
+    String? id,
+    String? type,
+    String? title,
+    String? content,
+    String? receivedFrom,
+    List<String>? sentTo,
+    bool? deleted,
+    bool? isFav,
+    String? createdAt,
+    String? modifiedAt,
+    String? deletedAt,
+    String? restoredAt,
+    int? color,
+  }) =>
+      Note(
+        id: id ?? this.id,
+        type: type ?? this.type,
+        title: title ?? this.title,
+        receivedFrom: receivedFrom ?? this.receivedFrom,
+        sentTo: sentTo ?? this.sentTo,
+        deleted: deleted ?? this.deleted,
+        isFav: isFav ?? this.isFav,
+        createdAt: createdAt ?? this.createdAt,
+        modifiedAt: modifiedAt ?? this.modifiedAt,
+        deletedAt: deletedAt ?? this.deletedAt,
+        restoredAt: restoredAt ?? this.restoredAt,
+        color: color ?? this.color,
       );
 
-  Map<String, dynamic> toMap() => {
-        "id": id,
-        "type": type ?? 'note',
-        "title": title,
-        "content": content,
-        "sentBy": sentBy ?? '',
-        "sentTo": List<dynamic>.from(sentTo?.map((x) => x) ?? []),
-        "deleted": deleted ?? false,
-        "isFav": isFav ?? false,
-        "createdAt": createdAt,
-        "modifiedAt": modifiedAt ?? '',
-        "deletedAt": deletedAt ?? '',
-        "restoredAt": restoredAt ?? '',
-        "color": color ?? 0,
-      };
+  factory Note.fromMap(Map<String, dynamic> note) => Note(
+        id: note["id"],
+        type: note["type"] ?? "note",
+        title: utf8.decode(base64Url.decode(note["title"])).toString(),
+        receivedFrom: note["sentBy"] ?? note["receivedFrom"] ?? "",
+        sentTo: note["sentTo"] == null ? [] : List<String>.from(note["sentTo"]!.map((x) => x)),
+        deleted: note["deleted"] ?? false,
+        isFav: note["isFav"] is String ? bool.parse(note["isFav"]) : note["isFav"] ?? false,
+        createdAt: note["createdAt"],
+        modifiedAt: note["modifiedAt"] ?? "",
+        deletedAt: note["deletedAt"] ?? "",
+        restoredAt: note["restoredAt"] ?? "",
+        color: note.containsKey("color") ? note["color"] : 0,
+      );
 }
-
-// List<Note> notes = [];

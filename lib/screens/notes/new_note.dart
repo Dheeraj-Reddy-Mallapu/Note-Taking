@@ -44,6 +44,8 @@ class _NewNoteState extends State<NewNote> {
       customColor.pinkishredContainer!,
       customColor.blueContainer!,
       customColor.purpleContainer!,
+      customColor.redContainer!,
+      customColor.greenContainer!,
     ];
     List<Color> primaryColours = [
       color.primary,
@@ -53,6 +55,8 @@ class _NewNoteState extends State<NewNote> {
       customColor.pinkishred!,
       customColor.blue!,
       customColor.purple!,
+      customColor.red!,
+      customColor.green!,
     ];
 
     if (savedContent == '') {
@@ -79,8 +83,10 @@ class _NewNoteState extends State<NewNote> {
       });
     }
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: !(savedContent != jsonEncode(contentController.document.toDelta().toJson()) ||
+          savedTitle != titleController.text),
+      onPopInvoked: (b) async {
         final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
         if (savedContent != jsonContent || savedTitle != titleController.text) {
           Get.defaultDialog(
@@ -114,7 +120,7 @@ class _NewNoteState extends State<NewNote> {
             ],
           );
         }
-        return true;
+        // return true; //TODO: Test this if working
       },
       child: Scaffold(
         appBar: AppBar(
@@ -192,19 +198,18 @@ class _NewNoteState extends State<NewNote> {
               ),
               Expanded(
                 child: q.QuillEditor.basic(
-                  readOnly: false,
-                  controller: contentController,
+                  configurations: q.QuillEditorConfigurations(
+                    controller: contentController,
+                    readOnly: false,
+                  ),
                 ),
               ),
               if (!kIsWeb)
-                q.QuillToolbar.basic(
-                  controller: contentController,
-                  multiRowsDisplay: false,
-                ),
-              if (kIsWeb)
-                q.QuillToolbar.basic(
-                  controller: contentController,
-                  multiRowsDisplay: true,
+                q.QuillToolbar.simple(
+                  configurations: q.QuillSimpleToolbarConfigurations(
+                    controller: contentController,
+                    multiRowsDisplay: kIsWeb ? true : false,
+                  ),
                 ),
             ],
           ),

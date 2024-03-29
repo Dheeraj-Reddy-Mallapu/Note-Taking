@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 import 'package:get/get.dart';
 import 'package:note_taking_firebase/custom_color.g.dart';
-import 'package:note_taking_firebase/objects/note.dart';
+import 'package:note_taking_firebase/objects/text_note.dart';
 import 'package:note_taking_firebase/services/firestore.dart';
 import 'package:note_taking_firebase/widgets/my_snackbar.dart';
 import 'package:random_string_generator/random_string_generator.dart';
 
 class EditNote extends StatefulWidget {
   const EditNote({super.key, required this.data, required this.content});
-  final Note data;
+  final TextNote data;
   final q.QuillController content;
 
   @override
@@ -29,19 +29,31 @@ class _EditNoteState extends State<EditNote> {
 
   int colourIndex = 0;
   late Icon selectedIcon;
-  int dummy = 0;
+
+  @override
+  void initState() {
+    titleController.text = widget.data.title;
+    final decodeJson = jsonDecode(widget.data.content);
+    contentController = q.QuillController(
+      document: q.Document.fromJson(decodeJson),
+      selection: const TextSelection.collapsed(offset: 0),
+    );
+    colourIndex = widget.data.color;
+    isFav = widget.data.isFav;
+    if (widget.data.isFav == true) {
+      fav = true;
+      favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
+    }
+    if (widget.data.isFav == false) {
+      fav = false;
+      favIcon = const Icon(Icons.favorite_border);
+    }
+
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (dummy == 0) {
-      titleController.text = utf8.decode(base64Url.decode(widget.data.title));
-      final decodeJson = jsonDecode(utf8.decode(base64Url.decode(widget.data.content)));
-      contentController = q.QuillController(
-        document: q.Document.fromJson(decodeJson),
-        selection: const TextSelection.collapsed(offset: 0),
-      );
-    }
-
     final color = Theme.of(context).colorScheme;
     final customColor = Theme.of(context).extension<CustomColors>()!;
     List<Color> colours = [
@@ -52,6 +64,8 @@ class _EditNoteState extends State<EditNote> {
       customColor.pinkishredContainer!,
       customColor.blueContainer!,
       customColor.purpleContainer!,
+      customColor.redContainer!,
+      customColor.greenContainer!,
     ];
     List<Color> primaryColours = [
       color.primary,
@@ -61,25 +75,9 @@ class _EditNoteState extends State<EditNote> {
       customColor.pinkishred!,
       customColor.blue!,
       customColor.purple!,
+      customColor.red!,
+      customColor.green!,
     ];
-
-    if (dummy == 0) {
-      colourIndex = widget.data.color ?? 0;
-    }
-
-    if (dummy == 0) {
-      setState(() {
-        isFav = widget.data.isFav ?? false;
-        if (widget.data.isFav == true) {
-          fav = true;
-          favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
-        }
-        if (widget.data.isFav == false) {
-          fav = false;
-          favIcon = const Icon(Icons.favorite_border);
-        }
-      });
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -103,6 +101,7 @@ class _EditNoteState extends State<EditNote> {
                       .updateNote(id: widget.data.id, title: encodedT, content: encodedC, color: colourIndex)
                       .whenComplete(() => mySnackBar(context, 'Hurray!', 'Successfully SAVED', ContentType.success));
                 } catch (e) {
+                  // ignore: use_build_context_synchronously
                   mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
                 }
               },
@@ -122,7 +121,7 @@ class _EditNoteState extends State<EditNote> {
                     onTap: () {
                       try {
                         FireStore().createBinNote(id: widget.data.id, deleted: true).whenComplete(() => Get.back());
-                        mySnackBar(context, 'Hey!', 'Moved to Recycle Bin', ContentType.success);
+                        mySnackBar(context, 'Bye!', 'Moved to Recycle Bin', ContentType.success);
                       } catch (e) {
                         mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
                       }
@@ -141,11 +140,11 @@ class _EditNoteState extends State<EditNote> {
                             ),
                             ListTile(
                               title: const Text("Last edited:"),
-                              subtitle: Text(widget.data.modifiedAt ?? ''),
+                              subtitle: Text(widget.data.modifiedAt),
                             ),
                             ListTile(
                               title: const Text("Recieved from:"),
-                              subtitle: Text(widget.data.sentBy ?? ''),
+                              subtitle: Text(widget.data.receivedFrom),
                             ),
                           ],
                         );
@@ -202,8 +201,8 @@ class _EditNoteState extends State<EditNote> {
                                                                     title: widget.data.title,
                                                                     content: widget.data.content,
                                                                     id: id,
-                                                                    deleted: widget.data.deleted ?? false,
-                                                                    color: widget.data.color ?? 0,
+                                                                    deleted: widget.data.deleted,
+                                                                    color: widget.data.color,
                                                                     sentBy: user.displayName ?? 'Anonymous User')
                                                                 .whenComplete(() =>
                                                                     db.collection(user.uid).doc(widget.data.id).update({
@@ -284,7 +283,6 @@ class _EditNoteState extends State<EditNote> {
                             onTap: () {
                               setState(() {
                                 colourIndex = index;
-                                dummy++;
                               });
                             },
                           ),
@@ -312,14 +310,12 @@ class _EditNoteState extends State<EditNote> {
                       setState(() {
                         isFav = true;
                         favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
-                        dummy++;
                       });
                       mySnackBar(context, 'Hurray!', 'Successfully added to Favorites', ContentType.success);
                     } else if (isFav == true) {
                       setState(() {
                         isFav = true;
                         favIcon = const Icon(Icons.favorite_border);
-                        dummy++;
                       });
                       mySnackBar(context, 'Hey!', 'Removed from Favorites', ContentType.success);
                     }
@@ -331,26 +327,25 @@ class _EditNoteState extends State<EditNote> {
             ),
             Expanded(
               child: q.QuillEditor(
-                expands: true,
-                padding: const EdgeInsets.all(2),
+                configurations: q.QuillEditorConfigurations(
+                  controller: contentController,
+                  expands: true,
+                  padding: const EdgeInsets.all(2),
+                  scrollable: true,
+                  autoFocus: false,
+                  readOnly: false,
+                  paintCursorAboveText: true,
+                ),
                 focusNode: FocusNode(),
                 scrollController: ScrollController(),
-                scrollable: true,
-                autoFocus: false,
-                readOnly: false,
-                paintCursorAboveText: true,
-                controller: contentController,
               ),
             ),
             if (!kIsWeb)
-              q.QuillToolbar.basic(
-                controller: contentController,
-                multiRowsDisplay: false,
-              ),
-            if (kIsWeb)
-              q.QuillToolbar.basic(
-                controller: contentController,
-                multiRowsDisplay: true,
+              q.QuillToolbar.simple(
+                configurations: q.QuillSimpleToolbarConfigurations(
+                  controller: contentController,
+                  multiRowsDisplay: kIsWeb ? true : false,
+                ),
               ),
           ],
         ),

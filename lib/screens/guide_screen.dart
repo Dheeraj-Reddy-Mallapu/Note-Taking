@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/flutter_quill.dart' hide Text;
+import 'package:flutter_quill/flutter_quill.dart';
 
 class GuideScreen extends StatelessWidget {
   const GuideScreen({super.key});
@@ -20,15 +20,17 @@ class GuideScreen extends StatelessWidget {
         title: const Text('Guide to use the App'),
       ),
       body: QuillEditor(
-        controller: controller,
+        configurations: QuillEditorConfigurations(
+          controller: controller,
+          scrollable: true,
+          padding: const EdgeInsets.all(3),
+          autoFocus: false,
+          readOnly: true,
+          showCursor: false,
+          expands: true,
+        ),
         focusNode: FocusNode(),
         scrollController: ScrollController(),
-        scrollable: true,
-        padding: const EdgeInsets.all(3),
-        autoFocus: false,
-        readOnly: true,
-        showCursor: false,
-        expands: true,
       ),
     );
   }

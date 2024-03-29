@@ -1,10 +1,9 @@
-import 'dart:convert';
 import 'package:animations/animations.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:note_taking_firebase/custom_color.g.dart';
-import 'package:note_taking_firebase/objects/note.dart';
+import 'package:note_taking_firebase/objects/text_note.dart';
 
 class NotesUI extends StatelessWidget {
   const NotesUI({
@@ -14,14 +13,14 @@ class NotesUI extends StatelessWidget {
     required this.openNote,
     required this.index,
   });
-  final Note data;
+  final TextNote data;
   final quill.QuillController content;
   final Widget openNote;
   final int index;
 
   @override
   Widget build(BuildContext context) {
-    String title = utf8.decode(base64Url.decode(data.title));
+    String title = data.title;
 
     final color = Theme.of(context).colorScheme;
     double size = MediaQuery.of(context).size.width;
@@ -45,7 +44,7 @@ class NotesUI extends StatelessWidget {
       customColor.blue!,
       customColor.purple!,
     ];
-    int colourIndex = data.color ?? 0;
+    int colourIndex = data.color;
     double listHeight = 200;
     if (kIsWeb && size > 880) {
       listHeight = 300;
@@ -104,15 +103,17 @@ class NotesUI extends StatelessWidget {
                 ),
               Expanded(
                 child: quill.QuillEditor(
-                  padding: const EdgeInsets.all(2.0),
+                  configurations: quill.QuillEditorConfigurations(
+                    controller: content,
+                    scrollable: true,
+                    autoFocus: false,
+                    expands: true,
+                    readOnly: true,
+                    enableInteractiveSelection: false,
+                    padding: const EdgeInsets.all(2.0),
+                  ),
                   focusNode: FocusNode(),
                   scrollController: ScrollController(),
-                  scrollable: true,
-                  autoFocus: false,
-                  expands: true,
-                  readOnly: true,
-                  enableInteractiveSelection: false,
-                  controller: content,
                 ),
               ),
             ]),

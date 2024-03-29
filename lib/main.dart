@@ -7,6 +7,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:note_taking_firebase/firebase_options.dart';
+import 'package:note_taking_firebase/provider/data_provider.dart';
 import 'package:note_taking_firebase/screens/drawings/drawing_pad.dart';
 import 'package:note_taking_firebase/screens/friends_list.dart';
 import 'package:note_taking_firebase/screens/guide_screen.dart';
@@ -55,8 +56,11 @@ class MyApp extends StatelessWidget {
           darkScheme = darkColorScheme;
         }
 
-        return ChangeNotifierProvider(
-          create: (context) => GoogleSignInProvider(),
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (context) => GoogleSignInProvider()),
+            ChangeNotifierProvider(create: (context) => DataProvider()),
+          ],
           child: GetMaterialApp(
             theme: ThemeData(
               useMaterial3: true,

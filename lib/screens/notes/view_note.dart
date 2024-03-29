@@ -4,21 +4,21 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:get/get.dart';
-import 'package:note_taking_firebase/objects/note.dart';
+import 'package:note_taking_firebase/objects/text_note.dart';
 import 'package:note_taking_firebase/services/firestore.dart';
 import 'package:note_taking_firebase/widgets/my_snackbar.dart';
 
 class ViewNote extends StatelessWidget {
   const ViewNote({super.key, required this.data, required this.content});
-  final Note data;
+  final TextNote data;
   final quill.QuillController content;
 
   @override
   Widget build(BuildContext context) {
     final titleController = TextEditingController();
     quill.QuillController contentController = quill.QuillController.basic();
-    titleController.text = utf8.decode(base64Url.decode(data.title));
-    final decodeJson = jsonDecode(utf8.decode(base64Url.decode(data.content)));
+    titleController.text = data.title;
+    final decodeJson = jsonDecode(data.content);
     contentController = quill.QuillController(
       document: quill.Document.fromJson(decodeJson),
       selection: const TextSelection.collapsed(offset: 0),
@@ -88,15 +88,17 @@ class ViewNote extends StatelessWidget {
             ),
             Expanded(
               child: quill.QuillEditor(
-                expands: true,
-                padding: const EdgeInsets.all(2),
+                configurations: quill.QuillEditorConfigurations(
+                  controller: contentController,
+                  padding: const EdgeInsets.all(2),
+                  scrollable: true,
+                  autoFocus: false,
+                  readOnly: true,
+                  showCursor: false,
+                  expands: true,
+                ),
                 focusNode: FocusNode(),
                 scrollController: ScrollController(),
-                scrollable: true,
-                autoFocus: false,
-                readOnly: true,
-                showCursor: false,
-                controller: contentController,
               ),
             ),
             ElevatedButton(

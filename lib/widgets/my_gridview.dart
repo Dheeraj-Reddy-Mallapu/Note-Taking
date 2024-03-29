@@ -2,8 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:note_taking_firebase/objects/drawing.dart';
+import 'package:note_taking_firebase/objects/drawing_note.dart';
 import 'package:note_taking_firebase/objects/note.dart';
+import 'package:note_taking_firebase/objects/text_note.dart';
 import 'package:note_taking_firebase/screens/drawings/drawing_pad.dart';
 import 'package:note_taking_firebase/screens/notes/edit_note.dart';
 import 'package:note_taking_firebase/screens/notes/view_note.dart';
@@ -12,10 +13,8 @@ import 'package:note_taking_firebase/widgets/notes_ui.dart';
 import 'package:flutter_quill/flutter_quill.dart' as q;
 
 class MyGridView extends StatelessWidget {
-  const MyGridView(
-      {super.key, required this.filteredDocs, required this.searchInput, required this.fav, required this.isBin});
+  const MyGridView({super.key, required this.filteredDocs, required this.fav, required this.isBin});
   final List<Map<String, dynamic>> filteredDocs;
-  final String searchInput;
   final bool fav;
   final bool isBin;
 
@@ -45,36 +44,39 @@ class MyGridView extends StatelessWidget {
       child: GridView.count(
         crossAxisCount: crossAxisCount,
         childAspectRatio: childAspectRatio,
-        children: List.generate(filteredDocs.length, (index) {
-          late dynamic data;
+        children: List.generate(
+          filteredDocs.length,
+          (index) {
+            late Note data;
 
-          String docType = filteredDocs[index]['type'] ?? 'note';
-          if (docType == 'note') {
-            data = Note.fromMap(filteredDocs[index]);
-          } else {
-            data = Drawing.fromMap(filteredDocs[index]);
-          }
-
-          late dynamic decodeContent;
-          late q.QuillController content;
-
-          if (data is Note) {
-            decodeContent = jsonDecode(utf8.decode(base64Url.decode(data.content)));
-            content = q.QuillController(
-              document: q.Document.fromJson(decodeContent),
-              selection: const TextSelection.collapsed(offset: 0),
-            );
-          }
-
-          if (searchInput.isEmpty) {
-            Widget openNote =
-                data is Note ? EditNote(data: data, content: content) : DrawingPad(isEditMode: true, drawing: data);
-            if (isBin == true) {
-              openNote =
-                  data is Note ? ViewNote(data: data, content: content) : DrawingPad(isEditMode: true, drawing: data);
+            String docType = filteredDocs[index]['type'] ?? 'note';
+            if (docType == 'note') {
+              data = TextNote.fromMap(filteredDocs[index]);
             } else {
-              openNote =
-                  data is Note ? EditNote(data: data, content: content) : DrawingPad(isEditMode: true, drawing: data);
+              data = DrawingNote.fromMap(filteredDocs[index]);
+            }
+
+            late q.QuillController content;
+
+            if (data is TextNote) {
+              final decodeContent = jsonDecode(data.content);
+              content = q.QuillController(
+                document: q.Document.fromJson(decodeContent),
+                selection: const TextSelection.collapsed(offset: 0),
+              );
+            }
+
+            Widget openNote = data is TextNote
+                ? EditNote(data: data, content: content)
+                : DrawingPad(isEditMode: true, drawing: data as DrawingNote);
+            if (isBin == true) {
+              openNote = data is TextNote
+                  ? ViewNote(data: data, content: content)
+                  : DrawingPad(isEditMode: true, drawing: data as DrawingNote);
+            } else {
+              openNote = data is TextNote
+                  ? EditNote(data: data, content: content)
+                  : DrawingPad(isEditMode: true, drawing: data as DrawingNote);
             }
 
             return AnimationConfiguration.staggeredGrid(
@@ -86,64 +88,22 @@ class MyGridView extends StatelessWidget {
                 curve: Curves.fastLinearToSlowEaseIn,
                 child: FadeInAnimation(
                   curve: Curves.fastLinearToSlowEaseIn,
-                  child: data is Note
+                  child: data is TextNote
                       ? NotesUI(
                           data: data,
                           content: content,
                           openNote: openNote,
                           index: index,
                         )
-                      : DrawingUI(data: data, openNote: openNote, index: index),
+                      : DrawingUI(
+                          data: data as DrawingNote,
+                          openNote: openNote,
+                        ),
                 ),
               ),
             );
-          }
-          if (utf8.decode(base64Url.decode(data.title)).toString().toLowerCase().contains(searchInput.toLowerCase())) {
-            return AnimationConfiguration.staggeredGrid(
-              position: index,
-              columnCount: crossAxisCount,
-              duration: const Duration(milliseconds: 500),
-              child: ScaleAnimation(
-                duration: const Duration(milliseconds: 900),
-                curve: Curves.fastLinearToSlowEaseIn,
-                child: FadeInAnimation(
-                  curve: Curves.fastLinearToSlowEaseIn,
-                  child: data is Note
-                      ? NotesUI(
-                          data: data,
-                          content: content,
-                          openNote: EditNote(data: data, content: content),
-                          index: index,
-                        )
-                      : DrawingUI(data: data, openNote: DrawingPad(isEditMode: true, drawing: data), index: index),
-                ),
-              ),
-            );
-          }
-          if (fav == true) {
-            return AnimationConfiguration.staggeredGrid(
-              position: index,
-              columnCount: crossAxisCount,
-              duration: const Duration(milliseconds: 500),
-              child: ScaleAnimation(
-                duration: const Duration(milliseconds: 900),
-                curve: Curves.fastLinearToSlowEaseIn,
-                child: FadeInAnimation(
-                  curve: Curves.fastLinearToSlowEaseIn,
-                  child: data is Note
-                      ? NotesUI(
-                          data: data,
-                          content: content,
-                          openNote: EditNote(data: data, content: content),
-                          index: index,
-                        )
-                      : DrawingUI(data: data, openNote: DrawingPad(isEditMode: true, drawing: data), index: index),
-                ),
-              ),
-            );
-          }
-          return const Center(child: Text('Something went wrong'));
-        }),
+          },
+        ),
       ),
     );
   }

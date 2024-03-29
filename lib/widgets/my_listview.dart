@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:note_taking_firebase/objects/drawing.dart';
-import 'package:note_taking_firebase/objects/note.dart';
+import 'package:note_taking_firebase/objects/drawing_note.dart';
+import 'package:note_taking_firebase/objects/text_note.dart';
 import 'package:note_taking_firebase/screens/drawings/drawing_pad.dart';
 import 'package:note_taking_firebase/screens/notes/edit_note.dart';
 import 'package:note_taking_firebase/widgets/drawing_ui.dart';
@@ -25,16 +25,16 @@ class MyListView extends StatelessWidget {
 
         String docType = filteredDocs[index]['type'] ?? 'note';
         if (docType == 'note') {
-          data = Note.fromMap(filteredDocs[index]);
+          data = TextNote.fromMap(filteredDocs[index]);
         } else {
-          data = Drawing.fromMap(filteredDocs[index]);
+          data = DrawingNote.fromMap(filteredDocs[index]);
         }
 
         late dynamic decodeContent;
         late q.QuillController content;
 
-        if (data is Note) {
-          decodeContent = jsonDecode(utf8.decode(base64Url.decode(data.content)));
+        if (data is TextNote) {
+          decodeContent = jsonDecode(data.content);
           content = q.QuillController(
             document: q.Document.fromJson(decodeContent),
             selection: const TextSelection.collapsed(offset: 0),
@@ -53,19 +53,19 @@ class MyListView extends StatelessWidget {
                 duration: const Duration(milliseconds: 1800),
                 curve: Curves.fastLinearToSlowEaseIn,
                 flipAxis: FlipAxis.y,
-                child: data is Note
+                child: data is TextNote
                     ? NotesUI(
                         data: data,
                         content: content,
                         openNote: EditNote(data: data, content: content),
                         index: index,
                       )
-                    : DrawingUI(data: data, openNote: DrawingPad(isEditMode: true, drawing: data), index: index),
+                    : DrawingUI(data: data, openNote: DrawingPad(isEditMode: true, drawing: data)),
               ),
             ),
           );
         }
-        if (utf8.decode(base64Url.decode(data.title)).toString().toLowerCase().contains(searchInput.toLowerCase())) {
+        if (data.title.toLowerCase().contains(searchInput.toLowerCase())) {
           return AnimationConfiguration.staggeredList(
             position: index,
             child: SlideAnimation(
@@ -77,14 +77,14 @@ class MyListView extends StatelessWidget {
                 duration: const Duration(milliseconds: 1440),
                 curve: Curves.fastLinearToSlowEaseIn,
                 flipAxis: FlipAxis.y,
-                child: data is Note
+                child: data is TextNote
                     ? NotesUI(
                         data: data,
                         content: content,
                         openNote: EditNote(data: data, content: content),
                         index: index,
                       )
-                    : DrawingUI(data: data, openNote: DrawingPad(isEditMode: true, drawing: data), index: index),
+                    : DrawingUI(data: data, openNote: DrawingPad(isEditMode: true, drawing: data)),
               ),
             ),
           );
@@ -102,14 +102,14 @@ class MyListView extends StatelessWidget {
                 duration: const Duration(milliseconds: 1800),
                 curve: Curves.fastLinearToSlowEaseIn,
                 flipAxis: FlipAxis.y,
-                child: data is Note
+                child: data is TextNote
                     ? NotesUI(
                         data: data,
                         content: content,
                         openNote: EditNote(data: data, content: content),
                         index: index,
                       )
-                    : DrawingUI(data: data, openNote: DrawingPad(isEditMode: true, drawing: data), index: index),
+                    : DrawingUI(data: data, openNote: DrawingPad(isEditMode: true, drawing: data)),
               ),
             ),
           );

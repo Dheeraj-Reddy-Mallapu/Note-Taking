@@ -12,9 +12,7 @@ class QRScan extends StatelessWidget {
       body: QRCodeDartScanView(
         scanInvertedQRCode: true,
         typeScan: TypeScan.live,
-        formats: const [
-          BarcodeFormat.QR_CODE,
-        ],
+        formats: const [BarcodeFormat.qrCode],
         onCapture: (Result result) {
           if (result.text.length == 28) {
             frndIdC.text = result.text;
