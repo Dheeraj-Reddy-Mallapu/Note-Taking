@@ -93,16 +93,24 @@ class _EditNoteState extends State<EditNote> {
         actions: [
           ElevatedButton(
               onPressed: () async {
-                final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
-                String encodedT = base64Url.encode(utf8.encode(titleController.text));
+                final jsonContent =
+                    jsonEncode(contentController.document.toDelta().toJson());
+                String encodedT =
+                    base64Url.encode(utf8.encode(titleController.text));
                 String encodedC = base64Url.encode(utf8.encode(jsonContent));
                 try {
                   await FireStore()
-                      .updateNote(id: widget.data.id, title: encodedT, content: encodedC, color: colourIndex)
-                      .whenComplete(() => mySnackBar(context, 'Hurray!', 'Successfully SAVED', ContentType.success));
+                      .updateNote(
+                          id: widget.data.id,
+                          title: encodedT,
+                          content: encodedC,
+                          color: colourIndex)
+                      .whenComplete(() => mySnackBar(context, 'Hurray!',
+                          'Successfully SAVED', ContentType.success));
                 } catch (e) {
                   // ignore: use_build_context_synchronously
-                  mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
+                  mySnackBar(
+                      context, 'Oh Snap!', e.toString(), ContentType.failure);
                 }
               },
               child: Text(
@@ -110,7 +118,8 @@ class _EditNoteState extends State<EditNote> {
                 style: TextStyle(color: primaryColours[colourIndex]),
               )),
           PopupMenuButton(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30)),
               itemBuilder: (context) {
                 return [
                   PopupMenuItem(
@@ -120,10 +129,14 @@ class _EditNoteState extends State<EditNote> {
                     ),
                     onTap: () {
                       try {
-                        FireStore().createBinNote(id: widget.data.id, deleted: true).whenComplete(() => Get.back());
-                        mySnackBar(context, 'Bye!', 'Moved to Recycle Bin', ContentType.success);
+                        FireStore()
+                            .createBinNote(id: widget.data.id, deleted: true)
+                            .whenComplete(() => Get.back());
+                        mySnackBar(context, 'Bye!', 'Moved to Recycle Bin',
+                            ContentType.success);
                       } catch (e) {
-                        mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
+                        mySnackBar(context, 'Oh Snap!', e.toString(),
+                            ContentType.failure);
                       }
                     },
                   ),
@@ -163,7 +176,8 @@ class _EditNoteState extends State<EditNote> {
                               const Center(
                                   child: Text(
                                 'Send to',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 20),
                               )),
                               Expanded(
                                 child: StreamBuilder<List>(
@@ -178,63 +192,99 @@ class _EditNoteState extends State<EditNote> {
                                           itemBuilder: (context, index) {
                                             final frndData = friendsData[index];
                                             return ListTile(
-                                              leading: CircleAvatar(child: Text('${index + 1}')),
+                                              leading: CircleAvatar(
+                                                  child: Text('${index + 1}')),
                                               title: Text(frndData['frndName']),
                                               onTap: () {
                                                 Get.defaultDialog(
-                                                    backgroundColor: colours[colourIndex],
+                                                    backgroundColor:
+                                                        colours[colourIndex],
                                                     title: frndData['frndName'],
-                                                    content: const Text('Once sent it cannot be unsent.'),
+                                                    content: const Text(
+                                                        'Once sent it cannot be unsent.'),
                                                     actions: [
                                                       TextButton(
                                                           onPressed: () {
                                                             Get.back();
                                                           },
-                                                          child: const Text('cancel')),
+                                                          child: const Text(
+                                                              'cancel')),
                                                       ElevatedButton(
                                                           onPressed: () async {
                                                             String id =
-                                                                RandomStringGenerator(fixedLength: 15).generate();
+                                                                RandomStringGenerator(
+                                                                        fixedLength:
+                                                                            15)
+                                                                    .generate();
                                                             dB
                                                                 .createNote(
-                                                                    uid: frndData['frndUid'],
-                                                                    title: widget.data.title,
-                                                                    content: widget.data.content,
+                                                                    uid: frndData[
+                                                                        'frndUid'],
+                                                                    title: widget
+                                                                        .data
+                                                                        .title,
+                                                                    content: widget
+                                                                        .data
+                                                                        .content,
                                                                     id: id,
-                                                                    deleted: widget.data.deleted,
-                                                                    color: widget.data.color,
-                                                                    sentBy: user.displayName ?? 'Anonymous User')
+                                                                    deleted: widget
+                                                                        .data
+                                                                        .deleted,
+                                                                    color: widget
+                                                                        .data
+                                                                        .color,
+                                                                    sentBy: user
+                                                                            .displayName ??
+                                                                        'Anonymous User')
                                                                 .whenComplete(() =>
-                                                                    db.collection(user.uid).doc(widget.data.id).update({
-                                                                      'sentToID': frndData['frndUid'],
+                                                                    db
+                                                                        .collection(user
+                                                                            .uid)
+                                                                        .doc(widget
+                                                                            .data
+                                                                            .id)
+                                                                        .update({
+                                                                      'sentToID':
+                                                                          frndData[
+                                                                              'frndUid'],
                                                                     }));
                                                             await db
-                                                                .collection(frndData['frndUid'])
+                                                                .collection(
+                                                                    frndData[
+                                                                        'frndUid'])
                                                                 .doc(id)
                                                                 .get()
                                                                 .then((value) {
-                                                              if (value.exists) {
-                                                                mySnackBar(context, 'Hurray!', 'Successfully SAVED',
-                                                                    ContentType.success);
+                                                              if (value
+                                                                  .exists) {
+                                                                mySnackBar(
+                                                                    context,
+                                                                    'Hurray!',
+                                                                    'Successfully SAVED',
+                                                                    ContentType
+                                                                        .success);
                                                                 Get.back();
                                                               } else {
                                                                 mySnackBar(
                                                                     context,
                                                                     'Oops!',
                                                                     'Something went wrong. Please try again',
-                                                                    ContentType.failure);
+                                                                    ContentType
+                                                                        .failure);
                                                               }
                                                             });
                                                             Get.back();
                                                           },
-                                                          child: const Text('Send'))
+                                                          child: const Text(
+                                                              'Send'))
                                                     ]);
                                               },
                                             );
                                           },
                                         );
                                       } else {
-                                        return const Center(child: CircularProgressIndicator());
+                                        return const Center(
+                                            child: CircularProgressIndicator());
                                       }
                                     }),
                               ),
@@ -266,7 +316,8 @@ class _EditNoteState extends State<EditNote> {
                         if (colourIndex == index) {
                           selectedIcon = const Icon(Icons.done);
                         } else {
-                          selectedIcon = Icon(Icons.adjust, color: colours[index]);
+                          selectedIcon =
+                              Icon(Icons.adjust, color: colours[index]);
                         }
                         return Padding(
                           padding: const EdgeInsets.all(2.0),
@@ -309,17 +360,26 @@ class _EditNoteState extends State<EditNote> {
                     if (isFav == false) {
                       setState(() {
                         isFav = true;
-                        favIcon = const Icon(Icons.favorite, color: Colors.redAccent);
+                        favIcon =
+                            const Icon(Icons.favorite, color: Colors.redAccent);
                       });
-                      mySnackBar(context, 'Hurray!', 'Successfully added to Favorites', ContentType.success);
+                      mySnackBar(
+                          context,
+                          'Hurray!',
+                          'Successfully added to Favorites',
+                          ContentType.success);
                     } else if (isFav == true) {
                       setState(() {
                         isFav = true;
                         favIcon = const Icon(Icons.favorite_border);
                       });
-                      mySnackBar(context, 'Hey!', 'Removed from Favorites', ContentType.success);
+                      mySnackBar(context, 'Hey!', 'Removed from Favorites',
+                          ContentType.success);
                     }
-                    db.collection(user.uid).doc(widget.data.id).update({'isFav': isFav});
+                    db
+                        .collection(user.uid)
+                        .doc(widget.data.id)
+                        .update({'isFav': isFav});
                   },
                   icon: favIcon,
                 ),
@@ -340,13 +400,13 @@ class _EditNoteState extends State<EditNote> {
                 scrollController: ScrollController(),
               ),
             ),
-            if (!kIsWeb)
-              q.QuillToolbar.simple(
-                configurations: q.QuillSimpleToolbarConfigurations(
-                  controller: contentController,
-                  multiRowsDisplay: kIsWeb ? true : false,
-                ),
+            // if (!kIsWeb)
+            q.QuillToolbar.simple(
+              configurations: q.QuillSimpleToolbarConfigurations(
+                controller: contentController,
+                multiRowsDisplay: kIsWeb ? true : false,
               ),
+            ),
           ],
         ),
       ),

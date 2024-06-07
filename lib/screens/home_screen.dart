@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (filteredDocs.isNotEmpty) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: MyGridView(filteredDocs: filteredDocs, fav: _fav, isBin: false),
+                      child: MyGridView(notes: filteredDocs, isBin: false),
                     );
                   } else {
                     return const Center(child: Text('No notes found'));
@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (filteredDocs.isNotEmpty) {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: MyListView(filteredDocs: filteredDocs, searchInput: searchController.text, fav: _fav),
+                      child: MyListView(notes: filteredDocs),
                     );
                   } else {
                     return const Center(child: Text('No notes found'));

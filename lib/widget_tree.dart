@@ -1,7 +1,7 @@
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_quill/extensions.dart';
 import 'package:note_taking_firebase/provider/data_provider.dart';
 import 'package:note_taking_firebase/screens/home_screen.dart';
 import 'package:note_taking_firebase/screens/welcome_screen.dart';
@@ -29,7 +29,7 @@ class WidgetTree extends StatelessWidget {
       }
     }
 
-    if (isAndroid(supportWeb: false)) {
+    if (!kIsWeb) {
       checkUpdate();
     }
 

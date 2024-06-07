@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:note_taking_firebase/services/firestore.dart';
+import 'package:note_taking_firebase/provider/data_provider.dart';
 import 'package:note_taking_firebase/widgets/my_gridview.dart';
+import 'package:provider/provider.dart';
 
 class RecycleBin extends StatefulWidget {
   const RecycleBin({super.key});
@@ -13,7 +14,11 @@ class _RecycleBinState extends State<RecycleBin> {
   @override
   Widget build(BuildContext context) {
     final color = Theme.of(context).colorScheme;
-    List<Map<String, dynamic>> filteredNotes = allDocs.where((element) => element['deleted'] == true).toList();
+
+    final dataProvider = Provider.of<DataProvider>(context, listen: true);
+    List<Map<String, dynamic>> filteredNotes =
+        dataProvider.allNotes.where((element) => element['deleted'] == true).toList();
+
     return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -26,6 +31,6 @@ class _RecycleBinState extends State<RecycleBin> {
           ),
           centerTitle: true,
         ),
-        body: MyGridView(filteredDocs: filteredNotes, fav: false, isBin: true));
+        body: MyGridView(notes: filteredNotes, isBin: true));
   }
 }

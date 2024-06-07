@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -64,36 +65,54 @@ class _NewNoteState extends State<NewNote> {
     }
 
     saveNote() async {
-      final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
+      final jsonContent =
+          jsonEncode(contentController.document.toDelta().toJson());
       String encodedT = base64Url.encode(utf8.encode(titleController.text));
       String encodedC = base64Url.encode(utf8.encode(jsonContent));
 
-      FireStore().createNote(
-          uid: user.uid, id: id, title: encodedT, content: encodedC, sentBy: '', deleted: false, color: colourIndex);
-      await db.collection(user.uid).doc(id).get().then((value) {
-        if (value.exists) {
-          mySnackBar(context, 'Hurray!', 'Successfully SAVED', ContentType.success);
+      try {
+        await FireStore().createNote(
+            uid: user.uid,
+            id: id,
+            title: encodedT,
+            content: encodedC,
+            sentBy: '',
+            deleted: false,
+            color: colourIndex);
+        await db.collection(user.uid).doc(id).get().then((value) {
+          if (value.exists) {
+            mySnackBar(
+                context, 'Hurray!', 'Successfully SAVED', ContentType.success);
 
-          savedTitle = titleController.text;
-          savedContent = jsonContent;
-          setState(() {});
-        } else {
-          mySnackBar(context, 'Oh Snap!', 'Something went wrong. Please try again', ContentType.failure);
-        }
-      });
+            savedTitle = titleController.text;
+            savedContent = jsonContent;
+            setState(() {});
+          } else {
+            mySnackBar(context, 'Oh Snap!',
+                'Something went wrong. Please try again', ContentType.failure);
+          }
+        });
+      } on FirebaseException catch (e) {
+        // ignore: use_build_context_synchronously
+        mySnackBar(context, 'Oh Snap!', e.toString(), ContentType.failure);
+      }
     }
 
     return PopScope(
-      canPop: !(savedContent != jsonEncode(contentController.document.toDelta().toJson()) ||
+      canPop: !(savedContent !=
+              jsonEncode(contentController.document.toDelta().toJson()) ||
           savedTitle != titleController.text),
-      onPopInvoked: (b) async {
-        final jsonContent = jsonEncode(contentController.document.toDelta().toJson());
+      onPopInvoked: (_) async {
+        final jsonContent =
+            jsonEncode(contentController.document.toDelta().toJson());
         if (savedContent != jsonContent || savedTitle != titleController.text) {
           Get.defaultDialog(
             title: 'Save Changes',
-            content: const Text('Save: save changes\nDiscard: ignore changes\nCancel: do nothing'),
+            content: const Text(
+                'Save: save changes\nDiscard: ignore changes\nCancel: do nothing'),
             actions: [
-              TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+              TextButton(
+                  onPressed: () => Get.back(), child: const Text('Cancel')),
               ElevatedButton(
                 onPressed: () {
                   contentController.clear();
@@ -103,7 +122,8 @@ class _NewNoteState extends State<NewNote> {
                   Get.back();
                 },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStatePropertyAll(color.errorContainer),
+                  backgroundColor:
+                      MaterialStatePropertyAll(color.errorContainer),
                   foregroundColor: MaterialStatePropertyAll(color.error),
                 ),
                 child: const Text('Discard'),
@@ -120,7 +140,6 @@ class _NewNoteState extends State<NewNote> {
             ],
           );
         }
-        // return true; //TODO: Test this if working
       },
       child: Scaffold(
         appBar: AppBar(
@@ -134,7 +153,9 @@ class _NewNoteState extends State<NewNote> {
           centerTitle: true,
           actions: [
             ElevatedButton(
-                style: ButtonStyle(foregroundColor: MaterialStatePropertyAll(primaryColours[colourIndex])),
+                style: ButtonStyle(
+                    foregroundColor:
+                        MaterialStatePropertyAll(primaryColours[colourIndex])),
                 onPressed: () async => await saveNote(),
                 child: const Text('SAVE'))
           ],
@@ -157,7 +178,8 @@ class _NewNoteState extends State<NewNote> {
                           if (colourIndex == index) {
                             selectedIcon = const Icon(Icons.done);
                           } else {
-                            selectedIcon = Icon(Icons.adjust, color: colours[index]);
+                            selectedIcon =
+                                Icon(Icons.adjust, color: colours[index]);
                           }
                           return Padding(
                             padding: const EdgeInsets.all(2.0),
@@ -193,7 +215,8 @@ class _NewNoteState extends State<NewNote> {
                 decoration: InputDecoration(
                     hintText: 'Title',
                     focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: primaryColours[colourIndex], width: 2),
+                      borderSide: BorderSide(
+                          color: primaryColours[colourIndex], width: 2),
                     )),
               ),
               Expanded(
@@ -204,13 +227,13 @@ class _NewNoteState extends State<NewNote> {
                   ),
                 ),
               ),
-              if (!kIsWeb)
-                q.QuillToolbar.simple(
-                  configurations: q.QuillSimpleToolbarConfigurations(
-                    controller: contentController,
-                    multiRowsDisplay: kIsWeb ? true : false,
-                  ),
+              // if (!kIsWeb)
+              q.QuillToolbar.simple(
+                configurations: q.QuillSimpleToolbarConfigurations(
+                  controller: contentController,
+                  multiRowsDisplay: kIsWeb ? true : false,
                 ),
+              ),
             ],
           ),
         ),

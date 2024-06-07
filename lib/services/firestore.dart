@@ -5,8 +5,6 @@ import 'package:note_taking_firebase/objects/drawing_note.dart';
 final db = FirebaseFirestore.instance;
 final user = FirebaseAuth.instance.currentUser!;
 
-List<Map<String, dynamic>> allDocs = [];
-
 class FireStore {
   Future createNote({
     required String uid,
@@ -122,25 +120,12 @@ class FireStore {
     await doc.update(json);
   }
 
-  Stream<List> getDocs({required String orderBy, required bool descending}) => db
-      .collection(user.uid)
-      .orderBy(orderBy, descending: descending)
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
-
   Stream<List> getFrndsList() => db
       .collection(user.uid)
       .doc('friends')
       .collection('list')
       .snapshots()
       .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
-
-  // Stream<List> readDrawings() => db
-  //     .collection(user.uid)
-  //     .doc('drawings')
-  //     .collection('list')
-  //     .snapshots()
-  //     .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
 
   Future updateNote({
     required String title,
